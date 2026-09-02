@@ -84,6 +84,5 @@
     "sass": "^1.69.4",
     "tailwindcss": "latest",
     "typescript": "^5"
-  },
-  "packageManager": "yarn@4.0.2"
+  }
 }
