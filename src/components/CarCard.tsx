@@ -37,16 +37,22 @@ const CarCard = ({
   return (
     <Link
       href={`car/${slug}`}
-      className="flex min-h-[356px] min-w-[180px] flex-col items-stretch justify-center gap-6 overflow-hidden rounded-lg border border-gray-100 bg-white p-4 text-black shadow-xl hover:scale-105 xl:min-h-[398px] dark:bg-black dark:text-white"
+      className="group flex min-h-[356px] min-w-[180px] flex-col items-stretch justify-center gap-6 overflow-hidden rounded-lg border border-border bg-card p-4 text-card-foreground shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl xl:min-h-[398px]"
     >
-      <div className="overflow-hidden rounded-lg">
-        <Image src={thumbnail} alt="car" width={272} height={204} />
+      <div className="relative overflow-hidden rounded-lg">
+        <Image
+          src={thumbnail}
+          alt={`Xe ${name}`}
+          width={272}
+          height={204}
+          className="h-auto w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+        />
       </div>
 
       <div className="text-start">
         {/* feature car */}
         <div className="mb-2 flex items-center justify-start gap-4">
-          <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-[#262626] dark:bg-primary dark:text-white">
+          <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-foreground dark:bg-primary dark:text-primary-foreground">
             {FuelEnum[fuel]}
           </span>
 
@@ -62,7 +68,7 @@ const CarCard = ({
                       : '',
                   )}
                 >
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {formatDateToDMY(orderDetail.startDate)} -{' '}
                     {formatDateToDMY(orderDetail.endDate)}
                   </span>
@@ -85,19 +91,19 @@ const CarCard = ({
         </div>
 
         <h3 className="text-base font-bold capitalize">{name}</h3>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           <MapPin size={16} className="inline text-black dark:text-white" />{' '}
           {address}
         </span>
 
-        <div className="my-4 h-[1px] w-full bg-gray-200" />
+        <div className="my-4 h-[1px] w-full bg-border" />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-3">
-            <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <Image
                 src={'/icons/star-rating-icon.svg'}
-                alt="star rating"
+                alt="Đánh giá"
                 width={13}
                 height={13}
                 className="inline"
@@ -105,10 +111,10 @@ const CarCard = ({
               {rating}
             </span>
 
-            <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <Image
                 src={'/icons/suitcase-icon.svg'}
-                alt="star rating"
+                alt="Số chuyến"
                 width={13}
                 height={13}
                 className="inline"

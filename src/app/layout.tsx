@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Be_Vietnam_Pro } from 'next/font/google';
 import React from 'react';
 import { Toaster } from 'sonner';
 
@@ -6,15 +7,17 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Providers from '@/stores/Providers';
 import './globals.css';
 
-// const roboto = Roboto({
-//   subsets: ['latin'],
-//   display: 'swap',
-//   variable: '--font-roboto',
-//   weight: ['100', '300', '400', '500', '700', '900'],
-// });
+const fontSans = Be_Vietnam_Pro({
+  subsets: ['latin', 'vietnamese'],
+  display: 'swap',
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  ),
   title: {
     default: 'Rental Cars',
     template: '%s | Rental Cars',
@@ -28,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="">
+    <html lang="vi" suppressHydrationWarning>
+      <body className={fontSans.variable}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

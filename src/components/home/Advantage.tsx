@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import React from 'react';
 
+import Reveal from '../reveal';
+
 const advantageList: { image: string; title: string; content: string }[] = [
   {
     image: '/images/an-tam-dat-xe.svg',
@@ -12,7 +14,7 @@ const advantageList: { image: string; title: string; content: string }[] = [
     image: '/images/thu-tuc-don-gian.svg',
     title: 'Thủ tục đơn giản',
     content:
-      'Chỉ cần có CCCD gắn chip (Hoặc Passport) & Giấy phép lái xe là bạn đã đủ điều kiện thuê xe trên Mioto.',
+      'Chỉ cần có CCCD gắn chip (Hoặc Passport) & Giấy phép lái xe là bạn đã đủ điều kiện thuê xe trên Rental Cars.',
   },
   {
     image: '/images/thanh-toan-de-dang.svg',
@@ -55,9 +57,10 @@ const Advantage = () => {
 
       <div className="mt-6 grid w-full grid-cols-3 grid-rows-2 gap-4 lg:grid-cols-2 lg:grid-rows-3">
         {advantageList.map(({ image, title, content }, index) => (
-          <div
+          <Reveal
             key={index}
-            className="flex max-w-[326px] flex-col items-center justify-start text-center"
+            delay={(index % 3) * 100}
+            className="flex max-w-[326px] flex-col items-center justify-start text-center transition-transform duration-300 hover:-translate-y-1"
           >
             <Image src={image} alt={title} width={240} height={240} />
             <h3 className="px-6 text-xl font-bold text-black dark:text-white">
@@ -66,7 +69,7 @@ const Advantage = () => {
             <p className="px-6 text-base text-black dark:text-white">
               {content}
             </p>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>

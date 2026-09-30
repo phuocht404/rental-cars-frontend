@@ -32,6 +32,9 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+      },
       colors: {
         info: '#3b82f6',
         success: '#22c55e',
@@ -87,6 +90,8 @@ module.exports = {
         },
       },
       animation: {
+        'fade-up': 'fadeUp 0.6s ease-out both',
+        'fade-in': 'fadeIn 0.6s ease-out both',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
