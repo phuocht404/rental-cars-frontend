@@ -18,18 +18,18 @@ const notificationList: {
 }[] = [
   {
     title: 'Thuê Hyundai Accent dài hạn với chi phí tiết kiệm 🚗',
-    description: '🌟Ưu đãi 5-10% - chỉ từ 15 triệu/ tháng cùng Mioto ',
+    description: '🌟Ưu đãi 5-10% - chỉ từ 15 triệu/ tháng cùng Rental Cars ',
     timer: '3h trước',
   },
   {
     title: '🚙 Thuê xe 7 chỗ rộng rãi, gia đình di chuyển thoải mái',
-    description: '⚡️Giảm 300k cho lần đầu thuê xe 7 chỗ tại Mioto',
+    description: '⚡️Giảm 300k cho lần đầu thuê xe 7 chỗ tại Rental Cars',
     timer: '4h trước',
   },
   {
     title: 'Bạn ơi, Xe VINFAST FADIL 2019 đang đợi chốt!',
     description:
-      'Kèo thì đã lên, deal cũng đã có. Mở MIOTO để nhận ưu đãi 200K khi nhập THUEGAP. Chốt xe ưng ý và thuê ngay thôi!',
+      'Kèo thì đã lên, deal cũng đã có. Mở Rental Cars để nhận ưu đãi 200K khi nhập THUEGAP. Chốt xe ưng ý và thuê ngay thôi!',
     timer: '10h trước',
   },
   {
@@ -41,7 +41,7 @@ const notificationList: {
   {
     title: 'Xe HONDA CIVIC 2022 đang có deal tốt!',
     description:
-      'Nhập THUENGAY giảm ngay 200K. Giữ chỗ sớm chiếc xe yêu thích trên Mioto để không bỏ lỡ hành trình tuyệt vời của bạn!',
+      'Nhập THUENGAY giảm ngay 200K. Giữ chỗ sớm chiếc xe yêu thích trên Rental Cars để không bỏ lỡ hành trình tuyệt vời của bạn!',
     timer: '2 ngày trước',
   },
 ];

@@ -9,11 +9,10 @@ const ReguPage = () => {
         <div className="">
           <h3 className="mb-4 text-xl font-semibold">I. Nguyên tắc chung</h3>
           <p className="text-justify text-base text-gray-600">
-            Sàn giao dịch TMĐT Mioto.vn (sau đây gọi tắt là “Sàn giao dịch") do
-            Công ty Cổ phần Mioto Asia ("Công ty") xây dựng và vận hành. Thành
+            Sàn giao dịch TMĐT Rental Cars (sau đây gọi tắt là “Sàn giao dịch") do Rental Cars ("Công ty") xây dựng và vận hành. Thành
             viên trên Sàn giao dịch là các thương nhân, tổ chức, cá nhân có hoạt
             động thương mại hợp pháp được Ban Quản lí Sàn giao dịch TMĐT
-            Mioto.vn ("Ban Quản lí") chính thức công nhận và được phép sử dụng
+            Rental Cars ("Ban Quản lí") chính thức công nhận và được phép sử dụng
             dịch vụ của Sàn giao dịch và các bên liên quan cung cấp. Nguyên tắc
             này áp dụng cho các Thành viên đăng ký sử dụng, tham gia đăng thông
             tin được thực hiện trên Sàn giao dịch. Thương nhân, tổ chức, cá nhân
@@ -21,7 +20,7 @@ const ReguPage = () => {
             trọng quyền và lợi ích hợp pháp của các bên tham gia hoạt động cung
             ứng và sử dụng dịch vụ không trái với qui định của Pháp luật. Thông
             tin về thương nhân, tổ chức, cá nhân tham gia là Thành viên trên
-            Mioto.vn phải minh bạch và chính xác. Dịch vụ được giới thiệu trên
+            Rental Cars phải minh bạch và chính xác. Dịch vụ được giới thiệu trên
             Sàn giao dịch phải đáp ứng đầy đủ các quy định của Pháp luật có liên
             quan, không thuộc các trường hợp cấm kinh doanh, cấm quảng cáo theo
             quy định của Pháp luật. Tất cả các nội dung trong Quy chế này phải
@@ -37,8 +36,7 @@ const ReguPage = () => {
           <div className="">
             <h4 className="mb-3 text-lg font-semibold">1. Định nghĩa chung</h4>
             <p className="text-justify text-base text-gray-600">
-              Tên miền Sàn Giao dịch TMĐT Mioto.vn: do Công ty Cổ phần Mioto
-              Asia phát triển với tên miền của Sàn giao dịch là Mioto.vn. Người
+              Tên miền Sàn Giao dịch TMĐT Rental Cars: do Rental Cars phát triển với tên miền của Sàn giao dịch là Rental Cars. Người
               bán (Chủ xe/Đối tác): là thương nhân, tổ chức, cá nhân có nhu cầu
               sử dụng dịch vụ của Sàn giao dịch để: giới thiệu xe cho thuê, dịch
               vụ cho thuê xe… Người mua (Khách thuê xe/Khách hàng): là thương
@@ -47,7 +45,7 @@ const ReguPage = () => {
               ký tài khoản hoặc không cần đăng ký. Thành viên: là bao gồm cả
               Người bán (Chủ xe) lẫn Người mua (Khách hàng). Thành viên tham gia
               giao dịch trên Sàn giao dịch là thương nhân, tổ chức, cá nhân có
-              nhu cầu thuê và cho thuê trên website Mioto.vn. Thành viên phải
+              nhu cầu thuê và cho thuê trên website Rental Cars. Thành viên phải
               đăng ký kê khai ban đầu các thông tin cá nhân có liên quan, được
               Ban Quản lí Sàn giao dịch chính thức công nhận và được phép sử
               dụng dịch vụ do Sàn giao dịch cung cấp. Sản phẩm/Dịch vụ: là dịch
@@ -115,7 +113,7 @@ const ReguPage = () => {
               từ Sàn giao dịch. Nếu không muốn tiếp tục nhận thông tin tiếp thị,
               Thành viên có thể từ chối bằng cách gọi điện cho Công ty theo số
               điện thoại 1900 9217 hoặc gửi email cho Bộ phận Chăm sóc Khách
-              hàng của Công ty tại support@mioto.vn
+              hàng của Công ty tại contact@rentalcars.vn
             </p>
           </div>
 
@@ -124,7 +122,7 @@ const ReguPage = () => {
               3. Điều khoản sử dụng
             </h4>
             <p className="text-justify text-base text-gray-600">
-              Khi tham gia hoạt động trên Sàn giao dịch TMĐT Mioto.vn có nghĩa
+              Khi tham gia hoạt động trên Sàn giao dịch TMĐT Rental Cars có nghĩa
               là Thành viên đồng ý với các điều khoản dưới đây. Các điều kiện,
               điều khoản và nội dung tại Sàn giao dịch và hợp đồng phát sinh bị
               chi phối và được hiểu theo Luật pháp của Việt Nam. Toàn bộ tranh
@@ -141,15 +139,15 @@ const ReguPage = () => {
               Mọi quyền sở hữu trí tuệ (đã đăng ký hoặc chưa đăng ký), nội dung
               thông tin và tất cả các thiết kế, văn bản, đồ họa, phần mềm, hình
               ảnh, video, âm nhạc, âm thanh, biên dịch phần mềm, mã nguồn và
-              phần mềm cơ bản đều là tài sản của Công ty Cổ phần Mioto Asia. Với
-              bản quyền đã được bảo lưu, toàn bộ nội dung của website Mioto.vn
+              phần mềm cơ bản đều là tài sản của Công ty. Với
+              bản quyền đã được bảo lưu, toàn bộ nội dung của website Rental Cars
               được bảo vệ bởi Luật bản quyền của Việt Nam và các Công ước Quốc
               tế. Thỏa thuận này không phải là một thương vụ mua bán và không
               chuyển nhượng cho khách hàng bất kỳ quyền sở hữu nào có liên quan
-              đến website Mioto.vn, hoặc bất kỳ quyển sở hữu tài sản trí tuệ nào
+              đến website Rental Cars, hoặc bất kỳ quyển sở hữu tài sản trí tuệ nào
               thuộc sở hữu của Công ty: tên Công ty, logo Công ty, logo của dịch
               vụ, tên sản phẩm liên quan đến dịch vụ. Bất kỳ tranh chấp nào phát
-              sinh từ việc sử dụng trái phép website Mioto.vn
+              sinh từ việc sử dụng trái phép website Rental Cars
             </p>
           </div>
 
@@ -189,9 +187,9 @@ const ReguPage = () => {
               1. Quy trình dành cho người mua (khách hàng)
             </h4>
             <p className="text-justify text-base text-gray-600">
-              Để thuê xe trên Sàn giao dịch, Khách hàng vào website Mioto.vn và
+              Để thuê xe trên Sàn giao dịch, Khách hàng vào website Rental Cars và
               thực hiện các bước sau: Bước 1: Khách hàng truy cập vào website
-              Mioto.vn và đăng nhập vào tài khoản của mình, nếu Khách hàng chưa
+              Rental Cars và đăng nhập vào tài khoản của mình, nếu Khách hàng chưa
               có tài khoản thì có thể đăng ký tạo tài khoản bằng Email, Facebook
               hoặc tài khoản Google. Bước 2: Tìm kiếm – Nhập địa điểm và khoảng
               thời gian Khách hàng muốn thuê xe, sau đó chọn tìm kiếm. Bước 3:
@@ -214,13 +212,13 @@ const ReguPage = () => {
               hàng sẽ xem xét và duyệt Yêu cầu thuê xe. Sau khi Yêu cầu thuê xe
               được duyệt, khách hàng thực hiện thanh toán tiền cọc 30% tổng số
               tiền hiển thị trên Thông tin chuyến đi. Sau khi đã đặt xe thành
-              công, Mioto sẽ gửi biên nhận điện tử (E-receipt) (xác nhận lại các
+              công, Rental Cars sẽ gửi biên nhận điện tử (E-receipt) (xác nhận lại các
               thời gian hành trình, thông tin xe, giá thuê, số tiền đã đặt cọc,
               số tiền còn lại cần thanh toán trực tiếp cho Chủ xe) cùng với Mã
               chuyến đi qua địa chỉ email của Khách hàng. Chủ xe cũng sẽ nhận
               được biên nhận điện tử để bảo đảm sẽ thực hiện đầy đủ các thỏa
               thuận đã cam kết với Khách hàng. Trước thời điểm thuê xe 1-2 ngày,
-              Mioto sẽ liên hệ với Khách hàng và Chủ xe để xác nhận lại các nội
+              Rental Cars sẽ liên hệ với Khách hàng và Chủ xe để xác nhận lại các nội
               dung trong biên nhận điện tử để đảm bảo việc thuê xe sẽ diễn ra
               như kế hoạch. Khi đến thời điểm thuê xe, Khách hàng sẽ đến địa
               điểm của Chủ xe để nhận xe hoặc Chủ xe sẽ đưa xe đến trực tiếp địa
@@ -250,7 +248,7 @@ const ReguPage = () => {
               lầm đối với người xem về uy tín cho thuê xe cũng như các thông tin
               nhận biết khác. Để đăng kí thông tin xe lên Sàn giao dịch, Người
               bán (Chủ xe) thực hiện theo hướng dẫn dưới đây: Bước 1: Trước tiên
-              người bán truy cập vào website https://www.mioto.vn, click chuột
+              người bán truy cập vào website Rental Cars, click chuột
               vào nút “Đăng kí”. Hoặc có thể dùng các tài khoản Facebook, Google
               để đăng ký. Bước 2: Tiến hành khai thông tin cá nhân theo mẫu
               hướng dẫn. Bước 3: Đăng tải thông tin xe cho thuê Chủ xe gửi thông
@@ -305,7 +303,7 @@ const ReguPage = () => {
             <p className="text-justify text-base text-gray-600">
               Khi muốn hủy chuyến đi đã đặt cọc, Khách hàng thực hiện theo các
               bước sau đây: Bước 1: Thông báo tới Sàn giao dịch về việc thay đổi
-              chuyến đi bằng các cách: 1.a Truy cập vào website Mioto.vn, đăng
+              chuyến đi bằng các cách: 1.a Truy cập vào website Rental Cars, đăng
               nhập vào tài khoản của Khách hàng, vào mục "Thông báo", chọn "Sắp
               tới", Khách hàng sẽ thấy danh sách các chuyến đi sắp tới đã đã đặt
               cọc, chọn chuyến đi cần hủy, chọn Hủy và xác nhận để gửi "Yêu cầu
@@ -335,7 +333,7 @@ const ReguPage = () => {
               tin cậy của Thành viên vào chất lượng dịch vụ của Sàn giao dịch.
               Khách hàng có thể thực hiện theo các bước sau: Bước 1: Khách hàng
               khiếu nại về dịch vụ qua số điện thoại 1900 9217 hoặc gửi mail cho
-              Bộ phận Chăm sóc Khách hàng tại địa chỉ support@mioto.vn. Thời
+              Bộ phận Chăm sóc Khách hàng tại địa chỉ contact@rentalcars.vn. Thời
               gian để Công ty tiếp nhận khiếu nại là 3 ngày kể từ ngày sử dụng
               dịch vụ hoặc từ ngày phát sinh sự việc. Bước 2: Trong thời hạn (3)
               ngày làm việc kể từ khi tiếp nhận thông tin khiếu nại của Khách
@@ -353,7 +351,7 @@ const ReguPage = () => {
               tra và đối chiếu. 3b. Chuyển các vấn đề có liên quan cho Chủ xe
               giải quyết. Trong thời hạn ba (3) ngày làm việc kể từ khi tiếp
               nhận thông báo về khiếu nại, Chủ xe có trách nhiệm phối hợp với
-              Mioto để giải quyết, xử lý khiếu nại. Chủ xe sẽ thông báo cho
+              Rental Cars để giải quyết, xử lý khiếu nại. Chủ xe sẽ thông báo cho
               Khách hàng biện pháp xử lý hoặc ủy quyền thông báo cho Công ty.
               Bước 4: Đóng khiếu nại 4a. Khách hàng đồng ý với các phản hồi của
               Bộ phận Chăm sóc Khách hàng -&gt; Kết thúc khiếu nại. Khách hàng

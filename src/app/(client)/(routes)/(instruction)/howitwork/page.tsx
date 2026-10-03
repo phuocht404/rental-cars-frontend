@@ -62,13 +62,13 @@ const ownerList: { icon: string; title: string; description: string }[] = [
     icon: 'icons/car-tick-icon.svg',
     title: 'Duyệt xe',
     description:
-      'Bạn chỉ cần chờ trong vài phút, hệ thống sẽ kiểm duyệt xe của bạn có đáp ứng đủ hay không yêu cầu cho thuê. Mioto sẽ chủ động liện hệ với bạn trong trường hợp có vấn đề phát sinh.',
+      'Bạn chỉ cần chờ trong vài phút, hệ thống sẽ kiểm duyệt xe của bạn có đáp ứng đủ hay không yêu cầu cho thuê. Rental Cars sẽ chủ động liện hệ với bạn trong trường hợp có vấn đề phát sinh.',
   },
   {
     icon: 'icons/bell-icon.svg',
     title: 'Nhận và phản hồi',
     description:
-      'Khi có khách gửi yêu cầu thuê xe, bạn sẽ nhận được thông báo từ Mioto. Kiểm tra thông tin cá nhân của khách và xác nhận cho thuê sớm nhất có thể. Khi có sự đồng ý cho thuê từ bạn, khách thuê sẽ chuyển tiền đặt cọc để hoàn tất việc đặt xe.',
+      'Khi có khách gửi yêu cầu thuê xe, bạn sẽ nhận được thông báo từ Rental Cars. Kiểm tra thông tin cá nhân của khách và xác nhận cho thuê sớm nhất có thể. Khi có sự đồng ý cho thuê từ bạn, khách thuê sẽ chuyển tiền đặt cọc để hoàn tất việc đặt xe.',
   },
   {
     icon: 'icons/key-icon.svg',
@@ -80,7 +80,7 @@ const ownerList: { icon: string; title: string; description: string }[] = [
     icon: 'icons/tick-outline-icon.svg',
     title: 'Hoàn thành đặt xe',
     description:
-      'Sau khi hết thời gian khách thuê, gặp khách thuê, kiểm tra xe, kí biên bản bàn giao và nhận lại xe của bạn như thỏa thuận ban đầu. Đừng quên cho điểm rating khách thuê và gợi ý họ cho điểm bạn trên ứng dụng Mioto. Điều này sẽ tăng uy tín của bạn trong cộng đồng thuê xe tự lái Mioto.',
+      'Sau khi hết thời gian khách thuê, gặp khách thuê, kiểm tra xe, kí biên bản bàn giao và nhận lại xe của bạn như thỏa thuận ban đầu. Đừng quên cho điểm rating khách thuê và gợi ý họ cho điểm bạn trên ứng dụng Rental Cars. Điều này sẽ tăng uy tín của bạn trong cộng đồng thuê xe tự lái Rental Cars.',
   },
 ];
 
