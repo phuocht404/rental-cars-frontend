@@ -88,50 +88,50 @@ const Sidebar = ({ className }: { className?: string }) => {
   };
 
   return (
-    <div className={cn('p-2', className)}>
-      <h2 className="text-2xl font-bold ">Xin chào {username}!</h2>
+    <aside
+      className={cn(
+        'flex flex-col gap-6 rounded-2xl border border-border bg-card p-4 lg:p-3',
+        className,
+      )}
+    >
+      <h2 className="px-2 text-xl font-bold">Xin chào {username}!</h2>
 
-      <div className="mt-6 flex h-full w-full flex-col items-start justify-between">
-        <div>
-          {menu.map(({ icon, href, label }, index) => (
+      <nav
+        aria-label="Tài khoản"
+        className="flex flex-col gap-1 lg:flex-row lg:overflow-x-auto"
+      >
+        {menu.map(({ icon, href, label }) => {
+          const active = href === '/' + pathname.split('/')[1];
+
+          return (
             <Link
               href={href}
-              key={index}
-              className="block w-full border-t-2 border-gray-100 py-4 text-left hover:bg-gray-100"
+              key={href}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'flex items-center gap-3 whitespace-nowrap rounded-lg border-l-4 px-3 py-3 text-sm transition-colors lg:border-l-0',
+                active
+                  ? 'border-primary bg-primary/10 font-semibold text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-accent hover:text-foreground',
+              )}
             >
-              <div
-                className={cn(
-                  'flex w-full items-center justify-start px-3',
-                  href === '/' + pathname.split('/')[1]
-                    ? 'border-l-4 border-solid border-primary'
-                    : '',
-                )}
-              >
-                {icon}
-                <span
-                  className={cn(
-                    'ml-2 text-base',
-                    href === '/' + pathname.split('/')[1] ? 'font-bold' : '',
-                  )}
-                >
-                  {label}
-                </span>
-              </div>
+              <span className="[&>svg]:h-5 [&>svg]:w-5">{icon}</span>
+              {label}
             </Link>
-          ))}
-        </div>
+          );
+        })}
+      </nav>
 
-        <Button
-          variant="outline"
-          className="mt-6 flex w-full items-center justify-start gap-3 px-3 py-4 text-base font-normal hover:bg-gray-100"
-          onClick={handleLogout}
-          isLoading={isLogged}
-        >
-          <LogOut size={24} className="rotate-180" />
-          Đăng xuất
-        </Button>
-      </div>
-    </div>
+      <Button
+        variant="outline"
+        className="w-full justify-start gap-3 px-3 text-sm font-normal"
+        onClick={handleLogout}
+        isLoading={isLogged}
+      >
+        <LogOut size={20} className="rotate-180" />
+        Đăng xuất
+      </Button>
+    </aside>
   );
 };
 

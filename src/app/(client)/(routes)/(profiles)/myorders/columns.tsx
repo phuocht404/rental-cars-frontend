@@ -227,7 +227,7 @@ export const columns: ColumnDef<any>[] = [
       <div className="flex items-center justify-between gap-2">
         <Link
           href={`/myorders/${row.getValue('id')}`}
-          className="rounded-full p-1 text-primary hover:bg-gray-200"
+          className="rounded-full p-1 text-primary hover:bg-accent"
         >
           <TooltipCustom content="Xem chi tiet">
             <Eye className="h-4 w-4" />

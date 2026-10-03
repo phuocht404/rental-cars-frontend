@@ -42,9 +42,9 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <div className="w-full rounded-xl bg-white p-6">
+    <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">
       <div className="">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center justify-start gap-4">
             <h3 className="text-2xl font-bold">Thông tin tài khoản</h3>
 
@@ -54,10 +54,10 @@ const ProfilePage = () => {
               gender={user.gender}
             />
           </div>
-          <span className="flex items-center justify-center gap-1 rounded-xl border border-gray-300 px-4 py-4">
+          <span className="flex items-center justify-center gap-1 rounded-xl border border-border px-4 py-4">
             <Image
               src="/icons/suitcase-icon.svg"
-              alt="icon"
+              alt=""
               width={24}
               height={24}
             />
@@ -66,12 +66,12 @@ const ProfilePage = () => {
           </span>
         </header>
 
-        <div className="mt-6 flex items-start justify-between">
-          <div className="flex w-1/3 flex-col items-stretch justify-center gap-3">
+        <div className="mt-6 flex items-start justify-between gap-6 md:flex-col md:items-stretch">
+          <div className="flex w-1/3 flex-col items-stretch md:w-full justify-center gap-3">
             <div className="relative flex items-center justify-center">
               <AvatarDialog
                 src={user?.avatarUrl}
-                className="absolute-center z-[1] h-[146px] w-[146px] cursor-pointer rounded-full bg-gray-200/10 hover:bg-gray-100/40"
+                className="absolute-center z-[1] h-[146px] w-[146px] cursor-pointer rounded-full bg-accent/10 hover:bg-accent/40"
               />
               <Avatar className="h-[146px] w-[146px] cursor-pointer">
                 <AvatarImage src={user?.avatarUrl} alt="avatar" className="" />
@@ -88,19 +88,19 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <div className="flex w-2/3 flex-col items-stretch justify-center gap-3 px-4">
+          <div className="flex w-2/3 flex-col items-stretch justify-center gap-3 px-4 md:w-full md:px-0">
             <div className="flex items-center justify-between">
-              <span className="text-base text-gray-700">Ngày sinh</span>
+              <span className="text-base text-foreground/80">Ngày sinh</span>
               <span className="text-base font-medium">
                 {formatDateToDMY(user?.dateOfBirth)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-base text-gray-700">Giới tính</span>
+              <span className="text-base text-foreground/80">Giới tính</span>
               <span className="text-base font-medium">{GenderEnum[user?.gender]}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-base text-gray-700">Số điện thoại</span>
+              <span className="text-base text-foreground/80">Số điện thoại</span>
               <span className="flex items-center justify-center gap-3 text-base font-medium">
                 {user.phone ? <p>{user.phone}</p> : <p>Thêm số điện thoại</p>}
                 <UpdateInfoDialog
@@ -111,7 +111,7 @@ const ProfilePage = () => {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-base text-gray-700">Email</span>
+              <span className="text-base text-foreground/80">Email</span>
               <span className="flex items-center justify-center gap-3 text-base font-medium">
                 {user.email ? <p>{user.email}</p> : <p>Thêm email</p>}
                 <UpdateInfoDialog

@@ -55,7 +55,7 @@ const Mytrips = () => {
   }, [dep]);
 
   return (
-    <div className="w-full rounded-xl bg-white p-6">
+    <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">
       <div className="mb-10">
         <header className="flex items-center justify-between">
           <h3 className="text-2xl font-bold">Đơn đặt xe</h3>

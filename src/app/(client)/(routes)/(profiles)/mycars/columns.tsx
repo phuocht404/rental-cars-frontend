@@ -58,9 +58,9 @@ export const columns: ColumnDef<CarType>[] = [
       const image: string[] = row.getValue('CarImage');
 
       return (
-        <div className="bg-slate-50">
+        <div className="h-[60px] w-[60px] overflow-hidden rounded-lg bg-muted">
           {row.getValue('CarImage') ? (
-            <Image src={image[0]} alt={image[0]} width={60} height={60} />
+            <Image src={image[0]} alt="" width={60} height={60} className="h-full w-full object-cover" />
           ) : (
             ''
           )}
