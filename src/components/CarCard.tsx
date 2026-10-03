@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react';
+import { Briefcase, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -36,23 +36,22 @@ const CarCard = ({
 }: CarCardProps) => {
   return (
     <Link
-      href={`car/${slug}`}
-      className="group flex min-h-[356px] min-w-[180px] flex-col items-stretch justify-center gap-6 overflow-hidden rounded-lg border border-border bg-card p-4 text-card-foreground shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl xl:min-h-[398px]"
+      href={`/car/${slug}`}
+      className="group flex h-full min-w-[180px] flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-card p-3 text-card-foreground shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_40px_-18px_hsl(var(--primary)/0.4)]"
     >
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
         <Image
           src={thumbnail}
           alt={`Xe ${name}`}
-          width={272}
-          height={204}
-          className="h-auto w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
 
-      <div className="text-start">
-        {/* feature car */}
-        <div className="mb-2 flex items-center justify-start gap-4">
-          <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-foreground dark:bg-primary dark:text-primary-foreground">
+      <div className="flex flex-1 flex-col gap-3 px-1 pb-1 text-start">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
             {FuelEnum[fuel]}
           </span>
 
@@ -78,10 +77,10 @@ const CarCard = ({
             >
               <span
                 className={cn(
-                  'rounded-full px-2 py-1 text-xs text-[#262626]  dark:text-white',
+                  'rounded-full px-2.5 py-1 text-xs font-medium',
                   status === 'RENTING'
-                    ? 'bg-yellow-500/10 dark:bg-yellow-500'
-                    : 'bg-success/10 dark:bg-success',
+                    ? 'bg-yellow-500/15 text-yellow-800 dark:text-yellow-300'
+                    : 'bg-success/15 text-green-800 dark:text-green-300',
                 )}
               >
                 {status === 'RENTING' ? 'Đang cho thuê' : 'Lịch đã đặt'}
@@ -90,43 +89,37 @@ const CarCard = ({
           )}
         </div>
 
-        <h3 className="text-base font-bold capitalize">{name}</h3>
-        <span className="text-xs text-muted-foreground">
-          <MapPin size={16} className="inline text-black dark:text-white" />{' '}
-          {address}
-        </span>
+        <div className="flex flex-col gap-1">
+          <h3 className="line-clamp-1 text-base font-semibold capitalize">
+            {name}
+          </h3>
+          <span className="flex items-start gap-1 text-xs text-muted-foreground">
+            <MapPin size={14} className="mt-px shrink-0" />
+            <span className="line-clamp-1">{address}</span>
+          </span>
+        </div>
 
-        <div className="my-4 h-[1px] w-full bg-border" />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center justify-center gap-3">
-            <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <Image
-                src={'/icons/star-rating-icon.svg'}
-                alt="Đánh giá"
-                width={13}
-                height={13}
-                className="inline"
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border pt-3">
+          <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Star
+                size={14}
+                className="fill-yellow-400 text-yellow-400"
+                aria-label="Đánh giá"
               />
               {rating}
             </span>
-
-            <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <Image
-                src={'/icons/suitcase-icon.svg'}
-                alt="Số chuyến"
-                width={13}
-                height={13}
-                className="inline"
-              />
+            <span className="flex items-center gap-1">
+              <Briefcase size={14} aria-label="Số chuyến" />
               {trips} chuyến đi
             </span>
           </div>
-          <span className="text-base font-semibold text-primary">
+
+          <span className="text-right text-lg font-bold leading-none text-primary">
             {formatNumberToCurrency(pricePerDay)}
-            <p className="ml-1 inline-block text-xs font-normal text-gray-500">
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
               / ngày
-            </p>
+            </span>
           </span>
         </div>
       </div>

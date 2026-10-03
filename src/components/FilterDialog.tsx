@@ -142,8 +142,8 @@ const FilterDialog = ({ date, setCarList, className }: FilterDialogProps) => {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
-          className={cn('hover:shadow-2xl', className)}
+          size="default"
+          className={cn('shrink-0 whitespace-nowrap', className)}
         >
           <SlidersHorizontal size={16} className="mr-1" />
           Bộ lọc
@@ -154,7 +154,7 @@ const FilterDialog = ({ date, setCarList, className }: FilterDialogProps) => {
           <DialogTitle className="text-2xl">Bộ lọc</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
-        <div className="h-[1px] w-full bg-gray-200" />
+        <div className="h-px w-full bg-border" />
         <ScrollArea className="h-96 w-full rounded-md border-none px-4 py-2">
           <div className="flex flex-col items-start justify-start gap-6 px-1">
             {/* sort filter */}
@@ -219,15 +219,15 @@ const FilterDialog = ({ date, setCarList, className }: FilterDialogProps) => {
                 onValueChange={handlePriceChange}
               />
               <div className="flex items-center justify-between">
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Giá thấp nhất</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Giá thấp nhất</h6>
                   <p className="text-sm font-semibold">{price[0]}K</p>
                 </div>
 
-                <div className="h-[1px] w-4 bg-gray-500" />
+                <div className="h-px w-4 bg-muted-foreground" />
 
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Giá cao nhất</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Giá cao nhất</h6>
                   <p className="text-sm font-semibold">{price[1]}K</p>
                 </div>
               </div>
@@ -245,15 +245,15 @@ const FilterDialog = ({ date, setCarList, className }: FilterDialogProps) => {
                 onValueChange={handleSeatsChange}
               />
               <div className="flex items-center justify-between">
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Tối thiểu</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Tối thiểu</h6>
                   <p className="text-sm font-semibold">{seats[0]} ghế</p>
                 </div>
 
-                <div className="h-[1px] w-4 bg-gray-500" />
+                <div className="h-px w-4 bg-muted-foreground" />
 
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Tối đa</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Tối đa</h6>
                   <p className="text-sm font-semibold">{seats[1]} ghế</p>
                 </div>
               </div>
@@ -271,17 +271,17 @@ const FilterDialog = ({ date, setCarList, className }: FilterDialogProps) => {
                 onValueChange={handleYearOfManufactureChange}
               />
               <div className="flex items-center justify-between">
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Tối thiểu</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Tối thiểu</h6>
                   <p className="text-sm font-semibold">
                     {yearOfManufacture[0]}
                   </p>
                 </div>
 
-                <div className="h-[1px] w-4 bg-gray-500" />
+                <div className="h-px w-4 bg-muted-foreground" />
 
-                <div className="rounded-md border border-solid border-gray-200 p-2 px-20 text-center">
-                  <h6 className="text-xs text-gray-500">Tối đa</h6>
+                <div className="rounded-md border border-solid border-border p-2 px-20 text-center">
+                  <h6 className="text-xs text-muted-foreground">Tối đa</h6>
                   <p className="text-sm font-semibold">
                     {yearOfManufacture[1]}
                   </p>

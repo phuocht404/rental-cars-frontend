@@ -9,6 +9,7 @@ import { API } from '@/services';
 import CarCard from '../CarCard';
 import CarCardSkeleton from '../CarCardSkeleton';
 import Reveal from '../reveal';
+import SectionHeading from './SectionHeading';
 
 const FeaturedCar = () => {
   const [newestCar, setNewestCar] = useState([]);
@@ -19,7 +20,6 @@ const FeaturedCar = () => {
     try {
       const response = await API.get(GET_NEWEST_CARS);
       setNewestCar(response.data);
-      setIsLoading(false);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -32,29 +32,37 @@ const FeaturedCar = () => {
   }, []);
 
   return (
-    <section className="mt-32 flex w-full justify-center">
-      <div className="text-center">
-        <h2 className="mb-6 text-4xl font-bold">Xe dành cho bạn</h2>
+    <section className="mt-20 w-full">
+      <SectionHeading
+        title="Xe dành cho bạn"
+        description="Những chiếc xe mới đăng, sẵn sàng nhận lịch thuê."
+        className="mb-8"
+      />
 
-        <div className="grid grid-cols-4 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {isLoading &&
-            Array.from({ length: 8 }).map((_, index) => (
-              <div className="col-span-1" key={index}>
-                <CarCardSkeleton />
-              </div>
-            ))}
+      <div className="grid grid-cols-4 gap-6 xl:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+        {isLoading &&
+          Array.from({ length: 8 }).map((_, index) => (
+            <div className="col-span-1" key={index}>
+              <CarCardSkeleton />
+            </div>
+          ))}
 
-          {!isLoading &&
-            newestCar?.map((car: any, index) => (
-              <Reveal
-                className="col-span-1"
-                key={car.slug ?? index}
-                delay={(index % 4) * 80}
-              >
-                <CarCard {...car} />
-              </Reveal>
-            ))}
-        </div>
+        {!isLoading && newestCar?.length === 0 && (
+          <p className="col-span-full rounded-2xl border border-dashed border-border px-6 py-12 text-center text-sm text-muted-foreground">
+            Chưa có xe nào để hiển thị. Vui lòng quay lại sau.
+          </p>
+        )}
+
+        {!isLoading &&
+          newestCar?.map((car: any, index) => (
+            <Reveal
+              className="col-span-1"
+              key={car.slug ?? index}
+              delay={(index % 4) * 80}
+            >
+              <CarCard {...car} />
+            </Reveal>
+          ))}
       </div>
     </section>
   );

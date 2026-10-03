@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import React from 'react';
 
+import Reveal from '../reveal';
+import SectionHeading from './SectionHeading';
+
 const carRentalInstructionsList: { image: string; title: string }[] = [
   {
     image: '/images/dat-xe-tren-web.svg',
@@ -22,35 +25,36 @@ const carRentalInstructionsList: { image: string; title: string }[] = [
 
 const CarRentalInstructions = () => {
   return (
-    <section className="mt-20 w-full rounded-lg bg-white py-6 dark:bg-black">
-      <div className="">
-        <div className="flex flex-col items-center justify-center gap-6">
-          <h2 className="text-4xl font-bold text-black dark:text-white">
-            Hướng dẫn thuê xe
-          </h2>
-          <p className="text-lg text-black dark:text-white">
-            Chỉ với 4 bước đơn giản để trải nghiệm thuê xe Mioto một cách nhanh
-            chóng
-          </p>
-        </div>
-      </div>
+    <section className="mt-24 w-full">
+      <SectionHeading
+        title="Hướng dẫn thuê xe"
+        description="Chỉ với 4 bước đơn giản để trải nghiệm thuê xe trên Rental Cars một cách nhanh chóng."
+        className="mb-8"
+      />
 
-      <ul className="mt-6 flex items-start justify-between gap-4 xl:grid xl:grid-cols-2">
+      <ol className="grid grid-cols-4 gap-6 xl:grid-cols-2 sm:grid-cols-1">
         {carRentalInstructionsList.map(({ image, title }, index) => (
-          <li
-            key={index}
-            className="mt-4 flex max-h-[308px] max-w-[313px] flex-col items-center gap-4 text-black dark:text-white"
-          >
-            <div className="max-h-[200px] max-w-[200px]">
-              <Image src={image} alt="title" width={200} height={200} />
-            </div>
-            <span className="flex min-w-[170px] items-start justify-center gap-3 px-10">
-              <p className="text-2xl font-bold text-primary">0{index + 1}</p>
-              <p className="min-w-[130px] text-2xl font-bold">{title}</p>
-            </span>
+          <li key={title}>
+            <Reveal delay={index * 100} className="h-full">
+              <div className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-6">
+              <Image
+                src={image}
+                alt=""
+                width={200}
+                height={200}
+                className="mx-auto h-[160px] w-auto"
+              />
+              <div className="flex items-start gap-3">
+                <span className="text-2xl font-bold text-primary">
+                  0{index + 1}
+                </span>
+                <span className="text-xl font-bold leading-snug">{title}</span>
+              </div>
+              </div>
+            </Reveal>
           </li>
         ))}
-      </ul>
+      </ol>
     </section>
   );
 };
