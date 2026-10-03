@@ -73,93 +73,93 @@ export const featureOptions = [
   {
     key: 'AIR_CONDITIONING',
     value: 'Điều hòa',
-    icon: <AirVent className="size-8 text-gray-800" />,
+    icon: <AirVent className="size-8 text-foreground" />,
   },
   {
     key: 'RADIO',
     value: 'Radio',
-    icon: <BoomBox className="size-8 text-gray-800" />,
+    icon: <BoomBox className="size-8 text-foreground" />,
   },
-  { key: 'USB', value: 'USB', icon: <Usb className="size-8 text-gray-800" /> },
+  { key: 'USB', value: 'USB', icon: <Usb className="size-8 text-foreground" /> },
   {
     key: 'BLUETOOTH',
     value: 'Bluetooth',
-    icon: <Bluetooth className="size-8 text-gray-800" />,
+    icon: <Bluetooth className="size-8 text-foreground" />,
   },
   {
     key: 'GPS',
     value: 'GPS',
-    icon: <LocateFixed className="size-8 text-gray-800" />,
+    icon: <LocateFixed className="size-8 text-foreground" />,
   },
   {
     key: 'PARKING_SENSOR',
     value: 'Cảm biến lùi',
-    icon: <GalleryVerticalEnd className="size-8 rotate-180 text-gray-800" />,
+    icon: <GalleryVerticalEnd className="size-8 rotate-180 text-foreground" />,
   },
   {
     key: 'CAMERA',
     value: 'Camera',
-    icon: <Video className="size-8 text-gray-800" />,
+    icon: <Video className="size-8 text-foreground" />,
   },
   {
     key: 'SUNROOF',
     value: 'Cửa sổ trời',
-    icon: <CloudSun className="size-8 text-gray-800" />,
+    icon: <CloudSun className="size-8 text-foreground" />,
   },
   {
     key: 'KEYLESS',
     value: 'Khóa không cần chìa',
-    icon: <Key className="size-8 text-gray-800" />,
+    icon: <Key className="size-8 text-foreground" />,
   },
   {
     key: 'AIRBAG',
     value: 'Túi khí',
-    icon: <Shell className="size-8 text-gray-800" />,
+    icon: <Shell className="size-8 text-foreground" />,
   },
   {
     key: 'AUTO_BRAKE',
     value: 'Phanh tự động',
-    icon: <ShieldMinus className="size-8 text-gray-800" />,
+    icon: <ShieldMinus className="size-8 text-foreground" />,
   },
   {
     key: 'ALARM',
     value: 'Chống trộm',
-    icon: <ShieldCheck className="size-8 text-gray-800" />,
+    icon: <ShieldCheck className="size-8 text-foreground" />,
   },
   {
     key: 'AUTO_WIPER',
     value: 'Gạc mưa tự động',
-    icon: <Gauge className="size-8 text-gray-800" />,
+    icon: <Gauge className="size-8 text-foreground" />,
   },
   {
     key: 'LANE_KEEPING',
     value: 'Giữ làn đường',
-    icon: <GanttChart className="size-8 text-gray-800" />,
+    icon: <GanttChart className="size-8 text-foreground" />,
   },
   {
     key: 'BLIND_SPOT',
     value: 'Cảnh báo điểm mù',
-    icon: <View className="size-8 text-gray-800" />,
+    icon: <View className="size-8 text-foreground" />,
   },
   {
     key: 'REAR_TRAFFIC',
     value: 'Cảnh báo xe phía sau',
-    icon: <CarTaxiFront className="size-8 text-gray-800" />,
+    icon: <CarTaxiFront className="size-8 text-foreground" />,
   },
   {
     key: 'TIRE_PRESSURE',
     value: 'Cảnh báo áp suất lốp',
-    icon: <LifeBuoy className="size-8 text-gray-800" />,
+    icon: <LifeBuoy className="size-8 text-foreground" />,
   },
   {
     key: 'KID_SEAT',
     value: 'ghế trẻ em',
-    icon: <Baby className="size-8 text-gray-800" />,
+    icon: <Baby className="size-8 text-foreground" />,
   },
   {
     key: 'MAP',
     value: 'Bản đồ',
-    icon: <Map className="size-8 text-gray-800" />,
+    icon: <Map className="size-8 text-foreground" />,
   },
 ];
 
@@ -389,23 +389,23 @@ export function CreateCarForm({ slug }: { slug: string }) {
             name="images"
             render={({ field }) => (
               <FormItem className="flex flex-col items-center justify-center gap-1">
-                <div className="flex min-h-36 w-full items-center justify-center gap-4 border border-gray-200 px-2">
-                  {carImages.length &&
+                <div className="flex min-h-36 w-full flex-wrap items-center justify-center gap-4 rounded-xl border border-dashed border-border p-3">
+                  {carImages.length > 0 &&
                     carImages.map((image: string) => (
                       <div
-                        className="relative size-28 overflow-hidden border border-gray-200 bg-slate-100 object-cover"
+                        className="relative size-28 overflow-hidden rounded-lg border border-border bg-muted"
                         key={image}
                       >
                         <Image
                           src={image}
-                          alt="avatar"
+                          alt="Ảnh xe"
                           fill
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
                     ))}
                 </div>
-                <FormLabel className="block cursor-pointer rounded bg-primary px-8 py-4 text-center text-white active:scale-95">
+                <FormLabel className="block cursor-pointer rounded-lg bg-primary px-8 py-3 text-center text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98]">
                   Chọn ảnh (tối thiểu 4 )
                 </FormLabel>
                 <FormControl>
@@ -429,7 +429,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
 
         <div className="flex flex-col items-start justify-between gap-2">
           <h2 className="text-xl font-bold">Biển số xe</h2>
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             Lưu ý: Biển số sẽ không thể thay đổi sau khi đăng kí.
           </p>
           <FormField
@@ -448,10 +448,10 @@ export function CreateCarForm({ slug }: { slug: string }) {
 
         <div className="mt-3 flex flex-col items-start justify-between gap-2">
           <h2 className="text-xl font-bold">Thông tin cơ bản</h2>
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             Lưu ý: Các thông tin cơ bản sẽ không thể thay đổi sau khi đăng kí.
           </p>
-          <div className="grid w-full grid-cols-2 grid-rows-3 gap-6">
+          <div className="grid w-full grid-cols-2 gap-6 md:grid-cols-1">
             <FormField
               control={form.control}
               name="brandId"
@@ -465,7 +465,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -529,7 +529,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -607,7 +607,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -667,7 +667,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -730,7 +730,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -792,7 +792,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -874,7 +874,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                       Tính năng
                     </FormLabel>
                   </div>
-                  <div className="grid w-full grid-cols-3 gap-3 lg:grid-cols-2">
+                  <div className="grid w-full grid-cols-3 gap-3 lg:grid-cols-2 sm:grid-cols-1">
                     {features.map((item: any) => (
                       <FormField
                         key={item.id}
@@ -907,7 +907,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                                 />
                               </FormControl>
                               <FormLabel
-                                className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 px-2 py-4 text-center font-normal ${
+                                className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-border px-2 py-4 text-center font-normal ${
                                   isChecked ? 'border-success' : ''
                                 }`}
                               >

@@ -54,7 +54,12 @@ const ResetPasswordForm = () => {
               <FormItem>
                 <FormLabel>Mật khẩu hiện tại</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập mật khẩu hiện tại..." {...field} />
+                  <Input
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Nhập mật khẩu hiện tại..."
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -68,7 +73,12 @@ const ResetPasswordForm = () => {
               <FormItem>
                 <FormLabel>Mật khẩu mới</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập mật khẩu mới..." {...field} />
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Nhập mật khẩu mới..."
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -82,7 +92,12 @@ const ResetPasswordForm = () => {
               <FormItem>
                 <FormLabel>Nhập lại mật khẩu mới</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập lại mật khẩu mới..." {...field} />
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Nhập lại mật khẩu mới..."
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
