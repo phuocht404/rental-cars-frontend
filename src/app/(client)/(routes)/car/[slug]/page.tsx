@@ -1,7 +1,15 @@
 'use client';
 
 import { addDays, subDays } from 'date-fns';
-import { AlertCircle, Armchair, Fuel, Info, Settings2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Armchair,
+  Fuel,
+  Info,
+  SearchX,
+  Settings2,
+} from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
@@ -10,6 +18,8 @@ import { toast } from 'sonner';
 import moment from 'moment';
 
 import HoverCardCustom from '@/components/cards/hover-card-custom';
+import CarDetailSkeleton from '@/components/skeletons/car-detail-skeleton';
+import StatusPanel from '@/components/StatusPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -34,6 +44,7 @@ import {
   formatDateTimeToAgo,
   formatDateToDMY,
 } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/use-media-query';
 import { API } from '@/services';
 import { addItem } from '@/stores/reducers/cartReducer';
 import { FeatureNameEnum, FuelEnum, TransmissionEnum } from '@/types/enums';
@@ -86,12 +97,14 @@ const surcharges: { name: string; price: string; description: string }[] = [
 ];
 
 const CarPage = ({ params }: { params: { slug: string } }) => {
+  const isNarrow = useMediaQuery('(max-width: 640px)');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: addDays(new Date(Date.now()), 1),
     to: addDays(new Date(Date.now()), 2),
   });
   const [car, setCar] = useState<any>(null);
+  const [loadFailed, setLoadFailed] = useState<boolean>(false);
   const [disabledDates, setDisabledDates] = useState<Date[] | Date | undefined>(
     undefined,
   );
@@ -117,12 +130,18 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
   const getCar = async () => {
     const slug = params.slug;
 
-    const response = await API.get(GET_CAR_BY_SLUG + `/${slug}`);
+    try {
+      const response = await API.get(GET_CAR_BY_SLUG + `/${slug}`);
 
-    if (response.status === 200) {
-      setCar(response.data);
+      if (response.status === 200) {
+        setCar(response.data);
 
-      getDisabledDates(response.data.id);
+        getDisabledDates(response.data.id);
+      } else {
+        setLoadFailed(true);
+      }
+    } catch (error: any) {
+      setLoadFailed(true);
     }
   };
 
@@ -177,15 +196,35 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
     }
   };
 
+  if (loadFailed) {
+    return (
+      <StatusPanel
+        tone="error"
+        icon={<SearchX />}
+        title="Không tìm thấy xe"
+        description="Xe này không tồn tại hoặc đã ngừng cho thuê."
+        actions={
+          <Link href="/">
+            <Button>Về trang chủ</Button>
+          </Link>
+        }
+      />
+    );
+  }
+
+  if (!car) {
+    return <CarDetailSkeleton />;
+  }
+
   return (
     <div className="mb-4">
       {/*stick menu*/}
-      <nav className="sticky top-[84px] z-[20] mb-14 w-full rounded-lg border border-gray-200 bg-white shadow">
-        <div className="flex items-center justify-start pl-8">
+      <nav className="sticky top-[72px] z-[20] mb-10 w-full overflow-x-auto rounded-xl border border-border bg-card">
+        <div className="flex w-max min-w-full items-center justify-start px-2">
           {menuItems.map((item, index) => (
             <a
               href={item.href}
-              className="inline-block px-4 py-3 font-medium text-gray-700 hover:text-gray-900"
+              className="inline-block whitespace-nowrap px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               key={index}
             >
               {item.name}
@@ -196,15 +235,16 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
 
       {/* images */}
       <div
-        className="mt-4 flex items-center justify-between gap-3"
+        className="mt-4 flex items-stretch justify-between gap-3 lg:flex-col"
         id="hinh-anh"
       >
-        <div className="h-full overflow-hidden rounded-xl">
+        <div className="h-full w-full overflow-hidden rounded-xl">
           <Image
             src={car?.images[0]}
             alt=""
             width={854}
             height={0}
+            className="h-auto w-full"
             style={{
               objectFit: 'cover',
               maxWidth: '854px',
@@ -214,10 +254,10 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
         </div>
 
         <div className="">
-          <div className="flex flex-col items-stretch justify-between gap-3">
+          <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row">
             {car?.images.slice(1, 4).map((image: any, index: number) => (
               <div
-                className="row-span-1 overflow-hidden rounded-xl"
+                className="row-span-1 overflow-hidden rounded-xl lg:flex-1"
                 key={index}
               >
                 <Image
@@ -225,6 +265,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                   alt=""
                   width={410}
                   height={190}
+                  className="h-auto w-full"
                   style={{
                     maxWidth: '410px',
                     maxHeight: '190px',
@@ -238,12 +279,12 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
       </div>
 
       {/* Car info */}
-      <div className="mt-6 flex items-start justify-between gap-6">
-        <div className="w-2/3 rounded-lg bg-white p-8">
+      <div className="mt-6 flex items-start justify-between gap-6 lg:flex-col">
+        <div className="w-2/3 rounded-2xl border border-border bg-card p-8 lg:w-full md:p-5">
           {/* info */}
           <div className="flex flex-col items-start justify-center">
-            <h2 className="text-4xl font-bold">{car?.name}</h2>
-            <div className="flex items-center justify-between gap-3 text-gray-500">
+            <h2 className="text-3xl font-bold tracking-tight md:text-2xl">{car?.name}</h2>
+            <div className="flex items-center justify-between gap-3 text-muted-foreground">
               <span className="flex items-center justify-center gap-1">
                 <Image
                   src="/icons/star-rating-icon.svg"
@@ -270,7 +311,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* characteristics */}
           <div className="" id="dac-diem">
@@ -279,7 +320,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
               <div className="flex items-center justify-center gap-2">
                 <Armchair className="h-8 w-8 text-primary" />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Số ghế</span>
+                  <span className="text-muted-foreground">Số ghế</span>
                   <span className="font-medium">{car?.seats} chỗ</span>
                 </div>
               </div>
@@ -287,7 +328,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
               <div className="flex items-center justify-center gap-2">
                 <Settings2 className="h-8 w-8 text-primary" />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Truyền động</span>
+                  <span className="text-muted-foreground">Truyền động</span>
                   <span className="font-medium">
                     {TransmissionEnum[car?.transmission]}
                   </span>
@@ -297,37 +338,37 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
               <div className="flex items-center justify-center gap-2">
                 <Fuel className="h-8 w-8 text-primary" />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Nhiên liệu</span>
+                  <span className="text-muted-foreground">Nhiên liệu</span>
                   <span className="font-medium">{FuelEnum[car?.fuel]}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* description */}
           <div className="">
             <h3 className="mb-4 text-xl font-medium">Mô tả</h3>
             <div>
-              <p className="text-align text-base text-gray-600">
+              <p className="text-align text-base text-muted-foreground">
                 {car?.description}
               </p>
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* features */}
           <div className="">
             <h3 className="mb-4 text-xl font-medium">Tính năng</h3>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-3 md:grid-cols-2">
               {car?.CarFeature.map((feature: string, index: number) => (
                 <span
-                  className="col-span-1 cursor-pointer rounded border border-gray-300 px-3 py-2 text-center shadow hover:scale-105"
+                  className="col-span-1 cursor-pointer rounded-lg border border-border bg-background px-3 py-2 text-center transition-colors hover:border-primary/50"
                   key={index}
                 >
-                  <p className="text-base text-gray-600">
+                  <p className="text-base text-muted-foreground">
                     {FeatureNameEnum[feature]}
                   </p>
                 </span>
@@ -335,7 +376,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* Giấy tờ thuê xe */}
           <div className="" id="giay-to-thue-xe">
@@ -344,8 +385,8 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </div>
             <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4">
               <div className="flex items-center justify-start gap-2">
-                <Info className="h-4 w-4 text-gray-600" />
-                <span className="text-xs text-gray-500">
+                <Info className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
                   Chọn 1 trong 2 hình thức
                 </span>
               </div>
@@ -357,7 +398,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                   width={24}
                   height={24}
                 />
-                <span className="text-base font-medium text-gray-900">
+                <span className="text-base font-medium text-foreground">
                   GPLX & CCCD gắn chip (đối chiếu)
                 </span>
               </div>
@@ -369,21 +410,21 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                   width={24}
                   height={24}
                 />
-                <span className="text-base font-medium text-gray-900">
+                <span className="text-base font-medium text-foreground">
                   GPLX (đối chiếu) & Passport (giữ lại)
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* Tài sản thế chấp */}
           <div className="">
             <h3 className="mb-4 text-xl font-medium">Tài sản thế chấp</h3>
             <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4">
               <div className="flex items-center justify-start gap-2">
-                <span className="text-base text-gray-800">
+                <span className="text-base text-foreground">
                   15 triệu (tiền mặt/chuyển khoản cho chủ xe khi nhận xe) hoặc
                   Xe máy (kèm cà vẹt gốc) giá trị 15 triệu
                 </span>
@@ -391,13 +432,13 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* Điều khoản */}
           <div className="">
             <h3 className="mb-4 text-xl font-medium">Điều khoản</h3>
 
-            <div className="text-gray-500">
+            <div className="text-muted-foreground">
               <span>Quy định khác:</span>
               <ul className="pl-6">
                 <li className="list-disc">Sử dụng xe đúng mục đích.</li>
@@ -428,7 +469,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </div>
           </div>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
           {/* chu xe */}
           <div className="" id="chu-xe">
@@ -463,7 +504,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
 
                   <div className="flex flex-col items-center justify-center gap-2">
                     <p className="text-xl font-medium">Chưa có đánh giá</p>
-                    <p className="text-gray-500">
+                    <p className="text-muted-foreground">
                       Hãy là người đầu tiên đánh giá chủ xe
                     </p>
                   </div>
@@ -483,7 +524,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
 
                     <div className="h-1 w-1 rounded-full bg-black" />
 
-                    <span className="text-gray-700">
+                    <span className="text-foreground/80">
                       {car?.reviews?.meta?.totalReviews} đánh giá
                     </span>
                   </div>
@@ -495,7 +536,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                         <>
                           {review && (
                             <div
-                              className="mt-4 flex items-center justify-between rounded-lg border border-gray-300 px-8 py-6"
+                              className="mt-4 flex items-center justify-between rounded-lg border border-border px-8 py-6"
                               key={index}
                             >
                               <div className="flex items-center justify-start gap-3">
@@ -540,9 +581,9 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
         </div>
 
         {/* tinh tien */}
-        <div className="w-1/3">
+        <div className="w-1/3 lg:w-full">
           {/* gia tien */}
-          <div className="flex flex-col items-start justify-between gap-3 rounded-lg bg-sky-100/50 p-8">
+          <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-8 md:p-5">
             {/* header */}
             <div className="flex items-center justify-start gap-2">
               <h3 className="text-2xl font-bold">
@@ -554,10 +595,10 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             {/* thoi gian thue */}
             <Dialog>
               <DialogTrigger asChild>
-                <div className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-primary bg-white p-4">
+                <div className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-primary bg-card p-4">
                   {/* nhan xe */}
                   <div className="">
-                    <span className="flex flex-col items-start justify-between gap-1 text-gray-700">
+                    <span className="flex flex-col items-start justify-between gap-1 text-foreground/80">
                       Nhận xe
                     </span>
                     {date?.from && (
@@ -571,7 +612,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
 
                   {/* tra xe */}
                   <div className="">
-                    <span className="flex flex-col items-start justify-between gap-1 text-gray-700">
+                    <span className="flex flex-col items-start justify-between gap-1 text-foreground/80">
                       Trả xe
                     </span>
                     {date?.to && (
@@ -593,12 +634,12 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                     defaultMonth={date?.from}
                     selected={date}
                     onSelect={setDate}
-                    numberOfMonths={2}
+                    numberOfMonths={isNarrow ? 1 : 2}
                     fromDate={addDays(new Date(Date.now()), 1)}
                     disabled={disabledDates}
                   />
                 </div>
-                <DialogFooter className="border-t-2 border-gray-200 py-3">
+                <DialogFooter className="border-t-2 border-border py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col items-start justify-center">
                       <div className="flex items-center justify-center gap-2 font-medium">
@@ -610,7 +651,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                         )}
                       </div>
                       {date?.from && date?.to && (
-                        <span className="text-md flex items-center justify-center gap-1 text-gray-700">
+                        <span className="text-md flex items-center justify-center gap-1 text-foreground/80">
                           Số ngày thuê:{' '}
                           <p className="font-bold">
                             {countDays(date?.from, date?.to)}
@@ -635,15 +676,15 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
             </Dialog>
 
             {/* dia diem nhan xe */}
-            <div className="flex w-full flex-col items-start justify-between gap-2 rounded-xl border border-primary bg-white p-4">
-              <h5 className="text-sm text-gray-700">Địa điểm giao xe</h5>
+            <div className="flex w-full flex-col items-start justify-between gap-2 rounded-xl border border-primary bg-card p-4">
+              <h5 className="text-sm text-foreground/80">Địa điểm giao xe</h5>
               <span className="font-bold">{car?.address}</span>
-              <span className="text-xs text-gray-500 ">
+              <span className="text-xs text-muted-foreground ">
                 *Chủ xe không hỗ trợ giao xe tận nơi
               </span>
             </div>
 
-            <div className="my-4 h-[1px] w-full bg-gray-400" />
+            <div className="my-4 h-px w-full bg-border" />
 
             {/* tong tien */}
             <div className="w-full">
@@ -668,7 +709,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
               </div>
             </div>
 
-            <div className="my-4 h-[1px] w-full bg-gray-400" />
+            <div className="my-4 h-px w-full bg-border" />
 
             {/* tiền cọc */}
             <div className="w-full">
@@ -703,7 +744,7 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
           </div>
 
           {/*  Phụ phí có thể phát sinh  */}
-          <div className="mt-6 w-full rounded-lg border border-gray-300 p-3">
+          <div className="mt-6 w-full rounded-lg border border-border p-3">
             <h5 className="mb-3 font-semibold text-primary">
               Phụ phí có thể phát sinh
             </h5>
@@ -714,13 +755,13 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
                   className="mb-2 flex items-start justify-start gap-2 text-xs"
                   key={index}
                 >
-                  <AlertCircle size={14} className="text-gray-500" />
+                  <AlertCircle size={14} className="text-muted-foreground" />
                   <div className="w-full">
                     <div className="flex items-center justify-between font-bold">
                       <span>{surcharge.name}</span>
                       <span>{surcharge.price}</span>
                     </div>
-                    <p className="text-gray-500">{surcharge.description}</p>
+                    <p className="text-muted-foreground">{surcharge.description}</p>
                   </div>
                 </div>
               ))}
