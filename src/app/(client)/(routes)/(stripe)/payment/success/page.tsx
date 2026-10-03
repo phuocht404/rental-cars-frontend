@@ -1,10 +1,13 @@
 'use client';
 
 import { BadgeAlert, BadgeCheck } from 'lucide-react';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
+import StatusPanel from '@/components/StatusPanel';
+import { Button } from '@/components/ui/button';
 import { CREATE_ORDER, GET_SESSION_BY_ID } from '@/lib/api-constants';
 import { formatCurrency } from '@/lib/utils';
 import { API } from '@/services';
@@ -58,40 +61,41 @@ const PaymentSuccessPage = () => {
     getSession();
   }, []);
 
-  return (
-    <div className="my-10 flex items-center justify-center text-gray-500">
-      <div className="rounded-2xl bg-transparent shadow-xl">
-        {session ? (
-          <>
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-100 bg-white px-20 py-8">
-              <BadgeCheck className="h-16 w-16 text-success" />
-              <h1 className="text-center text-3xl font-bold text-success">
-                Thanh toán thành công
-              </h1>
-              <p className="text-center text-sm dark:text-gray-500">
-                Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 bg-white px-20 py-8">
-              <div className="flex items-center justify-between gap-2">
-                <span>Tổng tiền:</span>
-                <span>{formatCurrency(session?.amount_total)}</span>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-100 bg-white px-20 py-8">
-              <BadgeAlert className="h-16 w-16 text-info" />
-              <h1 className="text-center text-3xl font-bold text-info">
-                Chưa có thông tin thanh toán
-              </h1>
-            </div>
-          </>
-        )}
+  return session ? (
+    <StatusPanel
+      tone="success"
+      icon={<BadgeCheck />}
+      title="Thanh toán thành công"
+      description="Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi"
+      actions={
+        <>
+          <Link href="/">
+            <Button variant="outline">Về trang chủ</Button>
+          </Link>
+          <Link href="/mytrips">
+            <Button>Xem chuyến đi</Button>
+          </Link>
+        </>
+      }
+    >
+      <div className="flex w-full items-center justify-between gap-2 rounded-xl bg-muted px-4 py-3 text-sm">
+        <span className="text-muted-foreground">Tổng tiền</span>
+        <span className="text-base font-semibold tabular-nums">
+          {formatCurrency(session?.amount_total)}
+        </span>
       </div>
-    </div>
+    </StatusPanel>
+  ) : (
+    <StatusPanel
+      tone="info"
+      icon={<BadgeAlert />}
+      title="Chưa có thông tin thanh toán"
+      actions={
+        <Link href="/">
+          <Button variant="outline">Về trang chủ</Button>
+        </Link>
+      }
+    />
   );
 };
 
