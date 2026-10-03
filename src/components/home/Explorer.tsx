@@ -33,9 +33,8 @@ const Explorer = () => {
 
         <div className="flex max-w-[52ch] flex-col gap-3 text-base leading-relaxed text-muted-foreground">
           <p>
-            Hơn 5,000 chủ xe đang cho thuê hiệu quả trên Rental Cars. Đăng ký
-            trở thành đối tác của chúng tôi ngay hôm nay để gia tăng thu nhập
-            hàng tháng.
+            Đăng xe miễn phí, tự quản lý lịch cho thuê và nhận tiền cọc trực
+            tuyến trước mỗi chuyến đi.
           </p>
 
           <p>

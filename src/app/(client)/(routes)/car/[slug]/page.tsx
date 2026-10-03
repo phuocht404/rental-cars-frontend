@@ -5,8 +5,8 @@ import { notFound } from 'next/navigation';
 import React, { cache } from 'react';
 
 import JsonLd from '@/components/seo/json-ld';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import StarRating from '@/components/ui/star-rating';
+import UserAvatar from '@/components/user-avatar';
 import { UserInfoAlertDialog } from '@/components/user-info-alert-dialog';
 import { serverFetch, serverFetchOrNull } from '@/lib/server-api';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
@@ -15,6 +15,8 @@ import type { CarDetail } from '@/types/car';
 import { FeatureNameEnum, FuelEnum, TransmissionEnum } from '@/types/enums';
 
 import BookingPanel from './booking-panel';
+import CarGallery from './car-gallery';
+import MobileBookingBar from './mobile-booking-bar';
 
 // ISR: trang được render ở lần truy cập đầu, cache lại và làm mới tối đa mỗi 60 giây
 export const revalidate = 60;
@@ -131,7 +133,7 @@ export default async function CarPage({ params }: PageProps) {
   const reviews = car.reviews?.data ?? [];
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 md:pb-20">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -163,7 +165,7 @@ export default async function CarPage({ params }: PageProps) {
 
       <nav
         aria-label="Mục lục"
-        className="sticky top-[72px] z-[20] mb-10 w-full overflow-x-auto rounded-xl border border-border bg-card"
+        className="sticky top-[72px] z-[20] mb-10 w-full overflow-x-auto rounded-xl border border-border bg-card/95 backdrop-blur [scrollbar-width:none] md:top-16 md:mb-6 md:rounded-none md:border-x-0 md:-mx-4 md:w-auto"
       >
         <div className="flex w-max min-w-full items-center justify-start px-2">
           {menuItems.map((item) => (
@@ -178,42 +180,9 @@ export default async function CarPage({ params }: PageProps) {
         </div>
       </nav>
 
-      {/* Ảnh: khung có tỉ lệ cố định để không bị nhảy bố cục (CLS) khi ảnh tải xong */}
-      <div
-        className="mt-4 grid scroll-mt-32 grid-cols-[2fr_1fr] gap-3 lg:grid-cols-1"
-        id="hinh-anh"
-      >
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-muted">
-          {car.images[0] && (
-            <Image
-              src={car.images[0]}
-              alt={`Xe ${car.name}`}
-              fill
-              priority
-              fetchPriority="high"
-              sizes="(max-width: 1024px) 100vw, 900px"
-              className="object-cover"
-            />
-          )}
-        </div>
-
-        <div className="grid grid-rows-3 gap-3 lg:grid-cols-3 lg:grid-rows-1">
-          {car.images.slice(1, 4).map((image, index) => (
-            <div
-              className="relative aspect-[16/9] overflow-hidden rounded-xl bg-muted lg:aspect-[4/3]"
-              key={image}
-            >
-              <Image
-                src={image}
-                alt={`Xe ${car.name} - ảnh ${index + 2}`}
-                fill
-                sizes="(max-width: 1024px) 33vw, 440px"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <section id="hinh-anh" className="mt-4 scroll-mt-32" aria-label="Hình ảnh xe">
+        <CarGallery images={car.images} name={car.name} />
+      </section>
 
       <div className="mt-6 flex items-start justify-between gap-6 lg:flex-col">
         <article className="w-2/3 rounded-2xl border border-border bg-card p-8 lg:w-full md:p-5">
@@ -221,19 +190,18 @@ export default async function CarPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold tracking-tight md:text-2xl">
               {car.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
-              <span className="flex items-center justify-center gap-1">
+            {/* Dấu ngăn cách nằm trong từng mục để khi xuống dòng không còn dấu chấm lơ lửng */}
+            <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground [&>li+li]:before:mr-3 [&>li+li]:before:content-['·']">
+              <li className="flex items-center gap-1">
                 <Image src="/icons/star-rating-icon.svg" alt="" width={16} height={17} />
                 <span>{car.rating || 'Chưa có đánh giá'}</span>
-              </span>
-              •
-              <span className="flex items-center justify-center gap-1">
+              </li>
+              <li className="flex items-center gap-1">
                 <Image src="/icons/suitcase-icon.svg" alt="" width={16} height={17} />
                 <span>{car.trips} chuyến</span>
-              </span>
-              •
-              <span>{car.address}</span>
-            </div>
+              </li>
+              <li>{car.address}</li>
+            </ul>
           </header>
 
           <div className="my-6 h-px w-full bg-border" />
@@ -354,7 +322,7 @@ export default async function CarPage({ params }: PageProps) {
 
             {car.owner && (
               <div className="flex items-center justify-start gap-3">
-                <UserInfoAlertDialog userId={car.owner.id} avatarUrl={car.owner.avatarUrl} />
+                <UserInfoAlertDialog userId={car.owner.id} avatarUrl={car.owner.avatarUrl} name={car.owner.name} />
                 <p className="text-2xl font-bold">{car.owner.name}</p>
               </div>
             )}
@@ -390,15 +358,11 @@ export default async function CarPage({ params }: PageProps) {
                       key={review.id}
                     >
                       <div className="flex items-center justify-start gap-3">
-                        <Avatar className="h-16 w-16">
-                          <AvatarImage
-                            src={review.customer.avatarUrl ?? undefined}
-                            alt={review.customer.name ?? 'avatar'}
-                          />
-                          <AvatarFallback>
-                            {(review.customer.name ?? '?').charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar
+                          name={review.customer.name}
+                          src={review.customer.avatarUrl}
+                          className="h-12 w-12"
+                        />
 
                         <div className="flex flex-col items-start justify-center gap-1">
                           <p className="text-lg font-bold">{review.customer.name}</p>
@@ -421,7 +385,7 @@ export default async function CarPage({ params }: PageProps) {
           </section>
         </article>
 
-        <aside className="sticky top-[140px] w-1/3 lg:static lg:w-full">
+        <aside id="dat-xe" className="sticky top-[140px] w-1/3 scroll-mt-24 lg:static lg:w-full">
           <BookingPanel
             car={{
               id: car.id,
@@ -455,6 +419,7 @@ export default async function CarPage({ params }: PageProps) {
           </div>
         </aside>
       </div>
+      <MobileBookingBar pricePerDay={car.pricePerDay} available={car.status === 'AVAILABLE'} />
     </div>
   );
 }

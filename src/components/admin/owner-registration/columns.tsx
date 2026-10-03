@@ -1,5 +1,6 @@
 'use client';
 
+import UserAvatar from '@/components/user-avatar';
 import { ColumnDef } from '@tanstack/react-table';
 
 
@@ -8,7 +9,6 @@ import { CarType } from '@/components/admin/schemas';
 import { DataTableColumnHeader } from '@/components/admin/tables/data-table-column-header';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatDateToDMY } from '@/lib/utils';
-import Image from 'next/image';
 import ConfirmOwnerRegistrationAlertDialog from './confirm-owner-registration-alert-dialog';
 
 export const columns: ColumnDef<CarType>[] = [
@@ -48,21 +48,10 @@ export const columns: ColumnDef<CarType>[] = [
   {
     accessorKey: 'avatarUrl',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Avatar" />
+      <DataTableColumnHeader column={column} title="Ảnh" />
     ),
     cell: ({ row }) => (
-      <div className="h-10 w-10 bg-slate-50">
-        {row.getValue('avatarUrl') ? (
-          <Image
-            src={row.getValue('avatarUrl')}
-            alt={row.getValue('avatarUrl')}
-            width={40}
-            height={40}
-          />
-        ) : (
-          ''
-        )}
-      </div>
+      <UserAvatar name={(row.original as any).name} src={row.getValue('avatarUrl') as string | null} />
     ),
     enableSorting: false,
     enableHiding: false,

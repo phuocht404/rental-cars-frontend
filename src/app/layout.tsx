@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Be_Vietnam_Pro } from 'next/font/google';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Toaster } from 'sonner';
 
+import NavigationProgress from '@/components/navigation-progress';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 import Providers from '@/stores/Providers';
@@ -77,6 +78,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <NavigationProgress />
+          </Suspense>
           <Providers>{children}</Providers>
           <Toaster
             position="bottom-right"

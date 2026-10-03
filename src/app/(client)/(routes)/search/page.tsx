@@ -5,7 +5,7 @@ import React, { Suspense } from 'react';
 
 import CarCard from '@/components/CarCard';
 import SearchSkeleton from '@/components/skeletons/search-skeleton';
-import { parseSearchParams, SearchQuery, toApiQuery, toSearchUrl } from '@/lib/search-params';
+import { parseSearchParams, rentalDays, SearchQuery, toApiQuery, toSearchUrl } from '@/lib/search-params';
 import { serverFetch } from '@/lib/server-api';
 import { cn } from '@/lib/utils';
 import type { CarSummary, Paginated } from '@/types/car';
@@ -91,6 +91,12 @@ const SearchResults = async ({ query }: { query: SearchQuery }) => {
         <p className="text-sm text-muted-foreground">
           Không có xe nào trống trong khoảng ngày này. Hãy thử đổi ngày thuê hoặc bỏ bớt bộ lọc.
         </p>
+        <Link
+          href={toSearchUrl({ startDate: query.startDate, endDate: query.endDate })}
+          className="mt-2 text-sm font-semibold text-primary hover:underline"
+        >
+          Xoá tất cả bộ lọc
+        </Link>
       </div>
     );
   }
@@ -101,9 +107,9 @@ const SearchResults = async ({ query }: { query: SearchQuery }) => {
         Tìm thấy {result.meta.totalCars ?? result.data.length} xe còn trống
       </p>
       <div className="mt-4 grid grid-cols-4 gap-6 xl:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-        {result.data.map((car) => (
+        {result.data.map((car, index) => (
           <div className="col-span-1" key={car.slug}>
-            <CarCard {...car} />
+            <CarCard {...car} days={rentalDays(query)} priority={index === 0} />
           </div>
         ))}
       </div>

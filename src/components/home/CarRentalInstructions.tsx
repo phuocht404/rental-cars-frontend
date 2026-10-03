@@ -32,23 +32,23 @@ const CarRentalInstructions = () => {
         className="mb-8"
       />
 
-      <ol className="grid grid-cols-4 gap-6 xl:grid-cols-2 sm:grid-cols-1">
+      <ol className="grid grid-cols-4 gap-6 xl:grid-cols-2 sm:gap-3">
         {carRentalInstructionsList.map(({ image, title }, index) => (
           <li key={title}>
             <Reveal delay={index * 100} className="h-full">
-              <div className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-6">
+              <div className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-6 sm:gap-3 sm:p-4">
               <Image
                 src={image}
                 alt=""
                 width={200}
                 height={200}
-                className="mx-auto h-[160px] w-auto"
+                className="mx-auto h-[160px] w-auto sm:h-20"
               />
               <div className="flex items-start gap-3">
-                <span className="text-2xl font-bold text-primary">
+                <span className="text-2xl font-bold text-primary sm:text-lg">
                   0{index + 1}
                 </span>
-                <span className="text-xl font-bold leading-snug">{title}</span>
+                <span className="text-xl font-bold leading-snug sm:text-sm">{title}</span>
               </div>
               </div>
             </Reveal>

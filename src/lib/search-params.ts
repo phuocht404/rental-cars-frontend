@@ -8,7 +8,23 @@ export interface SearchQuery {
   price?: [number, number];
   seats?: [number, number];
   years?: [number, number];
+  fuel?: string[];
+  transmission?: string;
 }
+
+export const FUEL_OPTIONS = [
+  { value: 'GASOLINE', label: 'Xăng' },
+  { value: 'DIESEL', label: 'Dầu' },
+  { value: 'ELECTRIC', label: 'Điện' },
+];
+export const TRANSMISSION_OPTIONS = [
+  { value: 'AUTOMATIC_TRANSMISSION', label: 'Số tự động' },
+  { value: 'MANUAL_TRANSMISSION', label: 'Số sàn' },
+];
+export const SEAT_PRESETS: { label: string; range: [number, number] }[] = [
+  { label: '4-5 chỗ', range: [4, 5] },
+  { label: '7 chỗ', range: [7, 7] },
+];
 
 export const PRICE_BOUNDS: [number, number] = [300, 3000];
 export const SEAT_BOUNDS: [number, number] = [4, 10];
@@ -40,6 +56,10 @@ export const parseSearchParams = (raw: RawParams): SearchQuery => {
   const start = parseDate(first(raw.startDate), tomorrow);
   const end = parseDate(first(raw.endDate), addDays(start, 1));
   const sort = first(raw.sort);
+  const fuel = first(raw.fuel)
+    ?.split(',')
+    .filter((value) => FUEL_OPTIONS.some((option) => option.value === value));
+  const transmission = first(raw.transmission);
 
   return {
     startDate: format(start, 'yyyy-MM-dd'),
@@ -49,6 +69,8 @@ export const parseSearchParams = (raw: RawParams): SearchQuery => {
     price: parseRange(first(raw.price), PRICE_BOUNDS),
     seats: parseRange(first(raw.seats), SEAT_BOUNDS),
     years: parseRange(first(raw.years), YEAR_BOUNDS),
+    fuel: fuel?.length ? fuel : undefined,
+    transmission: TRANSMISSION_OPTIONS.some((option) => option.value === transmission) ? transmission : undefined,
   };
 };
 
@@ -62,6 +84,8 @@ export const toSearchUrl = (query: Partial<SearchQuery>) => {
   if (query.price) params.set('price', query.price.join('-'));
   if (query.seats) params.set('seats', query.seats.join('-'));
   if (query.years) params.set('years', query.years.join('-'));
+  if (query.fuel?.length) params.set('fuel', query.fuel.join(','));
+  if (query.transmission) params.set('transmission', query.transmission);
   if (query.page && query.page > 1) params.set('page', String(query.page));
 
   return `/search?${params.toString()}`;
@@ -80,6 +104,12 @@ export const toApiQuery = (query: SearchQuery, limit = 12) => {
   query.price?.forEach((value) => params.append('priceRange', String(value)));
   query.seats?.forEach((value) => params.append('seats', String(value)));
   query.years?.forEach((value) => params.append('years', String(value)));
+  if (query.fuel?.length) params.set('fuel', query.fuel.join(','));
+  if (query.transmission) params.set('transmission', query.transmission);
 
   return params.toString();
 };
+
+/** Số ngày thuê (tính cả ngày nhận và ngày trả) */
+export const rentalDays = (query: Pick<SearchQuery, 'startDate' | 'endDate'>) =>
+  Math.round((parseISO(query.endDate).getTime() - parseISO(query.startDate).getTime()) / 86_400_000) + 1;

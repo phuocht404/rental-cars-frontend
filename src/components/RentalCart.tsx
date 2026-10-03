@@ -62,14 +62,16 @@ const RentalCart = () => {
     <>
       {isLoading && <LoadingScreen title="Đang thanh toán" />}
       <Sheet>
-        <SheetTrigger className="tex-white group -m-2 flex items-center rounded p-2">
-          <ShoppingCart
-            aria-hidden="true"
-            className="h-6 w-6 flex-shrink-0 text-white group-hover:scale-105"
-          />
-          <span className="ml-1 text-sm font-medium text-white group-hover:scale-105">
-            {itemCount}
-          </span>
+        <SheetTrigger
+          aria-label={itemCount > 0 ? `Giỏ hàng, ${itemCount} xe` : 'Giỏ hàng trống'}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+        >
+          <ShoppingCart aria-hidden="true" className="h-5 w-5" />
+          {itemCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-[11px] font-bold text-white ring-2 ring-primary">
+              {itemCount}
+            </span>
+          )}
         </SheetTrigger>
         <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
           <SheetHeader className="space-y-2.5 pr-6">

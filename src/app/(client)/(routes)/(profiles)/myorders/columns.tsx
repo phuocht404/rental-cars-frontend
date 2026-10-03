@@ -147,7 +147,7 @@ export const columns: ColumnDef<any>[] = [
         <div className="flex items-center justify-center">
           <span
             className={cn(
-              'rounded-full px-2 py-1 text-center text-white',
+              'whitespace-nowrap rounded-full px-3 py-1 text-center text-xs font-semibold text-white',
               statusItem.key === 'PENDING'
                 ? 'bg-warning/60'
                 : statusItem.key === 'CONFIRMED'
@@ -188,7 +188,7 @@ export const columns: ColumnDef<any>[] = [
         <div className="flex items-center justify-center">
           <span
             className={cn(
-              'rounded-full px-2 py-1 text-center text-white',
+              'whitespace-nowrap rounded-full px-3 py-1 text-center text-xs font-semibold text-white',
               statusItem.key === 'PENDING'
                 ? 'bg-warning/60'
                 : statusItem.key === 'DEPOSIT'

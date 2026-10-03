@@ -1,4 +1,3 @@
-import { Camera } from 'lucide-react';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import React from 'react';
@@ -6,7 +5,7 @@ import React from 'react';
 import AvatarDialog from '@/components/profile/AvatarDialog';
 import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 import UpdateInfoDialog from '@/components/profile/UpdateInfoDialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import UserAvatar from '@/components/user-avatar';
 import { ApiError, serverFetch } from '@/lib/server-api';
 import { formatDateToDMY } from '@/lib/utils';
 import { GenderEnum } from '@/types/enums';
@@ -58,12 +57,7 @@ export default async function ProfilePage() {
               src={user.avatarUrl}
               className="absolute-center z-[1] h-[146px] w-[146px] cursor-pointer rounded-full bg-accent/10 hover:bg-accent/40"
             />
-            <Avatar className="h-[146px] w-[146px] cursor-pointer">
-              <AvatarImage src={user.avatarUrl ?? undefined} alt="Ảnh đại diện" />
-              <AvatarFallback>
-                <Camera className="h-8 w-8" />
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar name={user.name || user.username} src={user.avatarUrl} className="h-[146px] w-[146px] text-4xl" />
           </div>
           <div className="flex flex-col items-center justify-center gap-3">
             <p className="text-2xl font-medium">{user.name || user.username}</p>

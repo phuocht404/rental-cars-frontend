@@ -6,18 +6,17 @@ import React from 'react';
 import { Button } from './ui/button';
 import TooltipCustom from './ui/tooltip-custom';
 
+// Mỗi link trỏ tới một trang riêng (trước đây 4 link "Chính sách" cùng trỏ về một trang)
 const policyItems = [
-  { title: 'Chính sách và quy định', link: '/regu' },
+  { title: 'Giới thiệu', link: '/about' },
   { title: 'Quy chế hoạt động', link: '/regu' },
-  { title: 'Bảo mật thông tin', link: '/regu' },
-  { title: 'Giải quyết tranh chấp', link: '/regu' },
+  { title: 'Tìm xe', link: '/search' },
 ];
 
 const findOutMoreItems = [
   { title: 'Hướng dẫn chung', link: '/howitwork' },
   { title: 'Hướng dẫn đặt xe', link: '/bookinghowto' },
-  { title: 'Hướng dẫn thanh toán', link: '/paymenthowto' },
-  { title: 'Hỏi và trả lời', link: '/howitwork' },
+  { title: 'Thanh toán & hoàn cọc', link: '/paymenthowto' },
 ];
 
 const linkClass =
@@ -26,15 +25,15 @@ const linkClass =
 const Footer = () => {
   return (
     <footer className="w-full border-t border-border bg-muted/50">
-      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-[2fr_1fr_1fr] gap-12 px-16 py-12 xl:px-8 md:grid-cols-1 md:gap-8 md:px-4">
+      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-[2fr_1fr_1fr] gap-12 px-16 py-12 xl:px-8 md:grid-cols-2 md:gap-8 md:px-4">
         {/* Thương hiệu và liên hệ */}
-        <div className="flex flex-col items-start gap-6">
+        <div className="flex flex-col items-start gap-6 md:col-span-2">
           <Image
             src="/images/logo2.png"
             width={200}
             height={0}
             alt="Rental Cars"
-            className="h-auto w-[200px]"
+            className="h-auto w-[200px] md:w-[150px]"
           />
 
           <div className="flex flex-col gap-4">
@@ -100,8 +99,8 @@ const Footer = () => {
         </div>
 
         {/* Chính sách */}
-        <nav aria-label="Chính sách" className="flex flex-col items-start gap-4">
-          <h3 className="text-base font-semibold">Chính sách</h3>
+        <nav aria-label="Rental Cars" className="flex flex-col items-start gap-4">
+          <h3 className="text-base font-semibold">Rental Cars</h3>
           <ul className="flex flex-col gap-3">
             {policyItems.map(({ title, link }) => (
               <li key={title}>
@@ -114,8 +113,8 @@ const Footer = () => {
         </nav>
 
         {/* Tìm hiểu thêm */}
-        <nav aria-label="Tìm hiểu thêm" className="flex flex-col items-start gap-4">
-          <h3 className="text-base font-semibold">Tìm hiểu thêm</h3>
+        <nav aria-label="Hướng dẫn" className="flex flex-col items-start gap-4">
+          <h3 className="text-base font-semibold">Hướng dẫn</h3>
           <ul className="flex flex-col gap-3">
             {findOutMoreItems.map(({ title, link }) => (
               <li key={title}>

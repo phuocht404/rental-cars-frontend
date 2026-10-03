@@ -36,20 +36,20 @@ const Header = () => {
 
                 {/* <Notification /> */}
 
-                <Username />
+                <Username compact />
               </div>
             ) : (
-              <div className="flex items-center justify-center gap-4 lg:hidden">
+              <div className="flex items-center justify-center gap-3">
                 <Link
                   href="/signup"
-                  className="flex h-10 min-w-[110px] items-center justify-center rounded-lg border border-white/60 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                  className="flex h-10 min-w-[110px] items-center justify-center rounded-lg border border-white/60 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 lg:hidden"
                 >
                   Đăng ký
                 </Link>
 
                 <Link
                   href="/signin"
-                  className="flex h-10 min-w-[110px] items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-primary transition-all hover:bg-white/90 active:scale-[0.98]"
+                  className="flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-white px-4 text-sm font-semibold text-primary transition-all hover:bg-white/90 active:scale-[0.98]"
                 >
                   Đăng nhập
                 </Link>

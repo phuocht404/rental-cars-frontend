@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import UserAvatar from '@/components/user-avatar';
 import { GET_USER_BY_ID } from '@/lib/api-constants';
 import { useCurrentUser } from '@/lib/auth-client';
 import { formatDateToDMY } from '@/lib/utils';
@@ -22,9 +22,11 @@ import { API } from '@/services';
 export function UserInfoAlertDialog({
   userId,
   avatarUrl,
+  name,
 }: {
   userId: number;
   avatarUrl?: string | null;
+  name?: string | null;
 }) {
   const [user, setUser] = useState<any>({});
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -51,14 +53,9 @@ export function UserInfoAlertDialog({
   return (
     <AlertDialog onOpenChange={(open) => open && getUser()}>
       <AlertDialogTrigger asChild>
-        <Avatar
-          className="h-20 w-20 cursor-pointer"
-          role="button"
-          aria-label="Xem thông tin chủ xe"
-        >
-          <AvatarImage src={avatarUrl ?? undefined} alt="avatar" />
-          <AvatarFallback>Avatar</AvatarFallback>
-        </Avatar>
+        <button type="button" aria-label="Xem thông tin chủ xe" className="rounded-full transition-transform hover:scale-105">
+          <UserAvatar name={name} src={avatarUrl} className="h-16 w-16 text-lg" />
+        </button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -68,10 +65,7 @@ export function UserInfoAlertDialog({
           <AlertDialogDescription className="">
             <div className="flex h-full w-full items-center justify-between gap-3">
               <div className="flex w-1/3 flex-col items-center justify-between gap-3">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src={avatarUrl ?? undefined} alt="avatar" />
-                  <AvatarFallback>Avatar</AvatarFallback>
-                </Avatar>
+                <UserAvatar name={user?.name ?? name} src={avatarUrl} className="h-24 w-24 text-2xl" />
 
                 <span className="text-xl font-bold text-foreground">
                   {user?.name}

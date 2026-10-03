@@ -1,7 +1,7 @@
 'use client';
 
+import UserAvatar from '@/components/user-avatar';
 import { ColumnDef } from '@tanstack/react-table';
-import Image from 'next/image';
 
 import { UserType } from '@/components/admin/schemas';
 import { DataTableColumnHeader } from '@/components/admin/tables/data-table-column-header';
@@ -49,21 +49,10 @@ export const columns: ColumnDef<UserType>[] = [
   {
     accessorKey: 'avatarUrl',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Avatar" />
+      <DataTableColumnHeader column={column} title="Ảnh" />
     ),
     cell: ({ row }) => (
-      <div className="h-10 w-10 bg-slate-50">
-        {row.getValue('avatarUrl') ? (
-          <Image
-            src={row.getValue('avatarUrl')}
-            alt={row.getValue('avatarUrl')}
-            width={40}
-            height={40}
-          />
-        ) : (
-          ''
-        )}
-      </div>
+      <UserAvatar name={(row.original as any).name} src={row.getValue('avatarUrl') as string | null} />
     ),
     enableSorting: false,
     enableHiding: false,
@@ -160,7 +149,7 @@ export const columns: ColumnDef<UserType>[] = [
 
       return (
         <div className="flex items-center">
-          <span>{roleList.value}</span>
+          <span className="whitespace-nowrap">{roleList.value}</span>
         </div>
       );
     },
@@ -186,7 +175,7 @@ export const columns: ColumnDef<UserType>[] = [
         <div className="flex w-[100px] items-center">
           <span
             className={cn(
-              'rounded-full px-4 py-1 text-white',
+              'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold text-white',
               statusItem.key === 'ACTIVE'
                 ? 'bg-success/70'
                 : statusItem.key === 'INACTIVE'
