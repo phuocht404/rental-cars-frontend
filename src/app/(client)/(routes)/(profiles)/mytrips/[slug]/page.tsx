@@ -1,37 +1,35 @@
 'use client';
 
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   GET_ORDER_BY_ID,
   UPDATE_ORDER_DETAIL_STATUS_BY_ID,
 } from '@/lib/api-constants';
 import { cn, formatCurrency, formatDateToDMY } from '@/lib/utils';
+import { apiErrorMessage, queryKeys, useApiQuery } from '@/lib/query';
 import { API } from '@/services';
 import { OrderDetailStatusEnum } from '@/types/enums';
 import BackButton from '@/components/back-button';
 import ReviewDialog from '@/components/review-dialog';
 
+// Hợp đồng chỉ có ý nghĩa khi chủ xe đã xác nhận chuyến
+const CONTRACT_STATUSES = ['CONFIRMED', 'RECEIVED', 'COMPLETED'];
+
 const OrderPage = () => {
-  const [order, setOrder] = useState<any>();
-  const pathname = usePathname();
+  const { slug } = useParams<{ slug: string }>();
+  const queryClient = useQueryClient();
+  const { data: order, refetch } = useApiQuery<any>(queryKeys.trip(slug), `${GET_ORDER_BY_ID}/${slug}`);
 
-  const getOrderById = async () => {
-    try {
-      const res = await API.get(GET_ORDER_BY_ID + `/${pathname.split('/')[2]}`);
-
-      if (res.status === 200) {
-        setOrder(res.data);
-      }
-
-      return;
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+  const getOrderById = () => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: queryKeys.myTrips });
   };
 
   const handleUpdateOrder = async (id: string, status: string) => {
@@ -45,24 +43,18 @@ const OrderPage = () => {
         getOrderById();
       }
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     }
   };
 
-  useEffect(() => {
-    getOrderById();
-  }, []);
-
   return (
-    <div className="w-full rounded-xl bg-white p-6">
+    <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">
       <div className="mb-10">
         <header className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-2">
             <BackButton />
             <h3 className="text-2xl font-bold">Thông tin đơn hàng</h3>
           </div>
-
-          <Button>Tạo hợp đồng</Button>
         </header>
       </div>
 
@@ -117,7 +109,7 @@ const OrderPage = () => {
             {order?.orderDetails?.length > 0 &&
               order?.orderDetails?.map((orderDetail: any) => (
                 <div
-                  className="flex w-full items-center justify-between gap-4 rounded-xl border border-gray-200 p-4"
+                  className="flex w-full items-center justify-between gap-4 rounded-xl border border-border p-4"
                   key={orderDetail?.id}
                 >
                   <div className="flex items-center gap-2">
@@ -182,7 +174,7 @@ const OrderPage = () => {
                     </span>
                   </div>
 
-                  <div className="h-[70px] w-[1px] bg-gray-200" />
+                  <div className="h-[70px] w-[1px] bg-accent" />
 
                   <div className="">
                     <h5 className="font-semibold">Hành động</h5>
@@ -218,6 +210,14 @@ const OrderPage = () => {
                             Trả xe
                           </Button>
                         )} */}
+                      {CONTRACT_STATUSES.includes(orderDetail?.orderDetailStatus) && (
+                        <Link
+                          href={`/mytrips/${slug}/contract/${orderDetail?.id}`}
+                          className={buttonVariants({ variant: 'outline' })}
+                        >
+                          Xem hợp đồng
+                        </Link>
+                      )}
                       {!orderDetail?.review?.id && (
                         <>
                           {orderDetail?.orderDetailStatus === 'COMPLETED' && (

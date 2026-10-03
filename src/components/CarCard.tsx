@@ -1,12 +1,11 @@
-import { MapPin } from 'lucide-react';
+import { Armchair, Fuel, MapPin, Settings2, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-import { cn, formatDateToDMY, formatNumberToCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatDateToDMY, formatNumberToCurrency } from '@/lib/utils';
 import { FuelEnum, TransmissionEnum } from '@/types/enums';
 
-import TooltipCustom from './ui/tooltip-custom';
 
 interface CarCardProps {
   slug: string;
@@ -14,12 +13,17 @@ interface CarCardProps {
   name: string;
   transmission: keyof typeof TransmissionEnum;
   fuel: keyof typeof FuelEnum;
+  seats?: number;
   address: string;
   pricePerDay: number;
   trips: number;
   rating: number;
   status: string;
-  orderDetails: any[];
+  orderDetails?: any[];
+  /** Số ngày đang tìm (trang tìm kiếm) để hiện tổng tiền */
+  days?: number;
+  /** Ảnh ưu tiên tải sớm (thẻ đầu tiên trong màn hình) */
+  priority?: boolean;
 }
 
 const CarCard = ({
@@ -27,101 +31,102 @@ const CarCard = ({
   thumbnail,
   name,
   fuel,
+  transmission,
+  seats,
   address,
   pricePerDay,
   trips,
   rating,
   status,
-  orderDetails,
+  orderDetails = [],
+  days,
+  priority,
 }: CarCardProps) => {
+  const isNew = trips === 0 && !rating;
+  const specs = [
+    seats ? { icon: Armchair, label: `${seats} chỗ` } : null,
+    { icon: Settings2, label: transmission === 'MANUAL_TRANSMISSION' ? 'Số sàn' : 'Số tự động' },
+    { icon: Fuel, label: FuelEnum[fuel] },
+  ].filter(Boolean) as { icon: typeof Fuel; label: string }[];
+
   return (
     <Link
-      href={`car/${slug}`}
-      className="flex min-h-[356px] min-w-[180px] flex-col items-stretch justify-center gap-6 overflow-hidden rounded-lg border border-gray-100 bg-white p-4 text-black shadow-xl hover:scale-105 xl:min-h-[398px] dark:bg-black dark:text-white"
+      href={`/car/${slug}`}
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_40px_-18px_hsl(var(--primary)/0.35)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]"
     >
-      <div className="overflow-hidden rounded-lg">
-        <Image src={thumbnail} alt="car" width={272} height={204} />
-      </div>
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        <Image
+          src={thumbnail}
+          alt={`Xe ${name}`}
+          fill
+          priority={priority}
+          sizes="(max-width: 640px) 85vw, (max-width: 1280px) 33vw, 320px"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        />
 
-      <div className="text-start">
-        {/* feature car */}
-        <div className="mb-2 flex items-center justify-start gap-4">
-          <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-[#262626] dark:bg-primary dark:text-white">
-            {FuelEnum[fuel]}
-          </span>
-
-          {orderDetails.length > 0 && (
-            <TooltipCustom
-              content={orderDetails.map((orderDetail, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'my-1 flex items-center justify-between rounded-full p-1',
-                    orderDetail?.orderDetailStatus === 'RECEIVED'
-                      ? 'bg-yellow-500/10'
-                      : '',
-                  )}
-                >
-                  <span className="text-xs text-gray-500">
-                    {formatDateToDMY(orderDetail.startDate)} -{' '}
-                    {formatDateToDMY(orderDetail.endDate)}
-                  </span>
-                </div>
-              ))}
-              className="z-[29]"
-            >
-              <span
-                className={cn(
-                  'rounded-full px-2 py-1 text-xs text-[#262626]  dark:text-white',
-                  status === 'RENTING'
-                    ? 'bg-yellow-500/10 dark:bg-yellow-500'
-                    : 'bg-success/10 dark:bg-success',
-                )}
-              >
-                {status === 'RENTING' ? 'Đang cho thuê' : 'Lịch đã đặt'}
-              </span>
-            </TooltipCustom>
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {isNew && (
+            <span className="rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold text-primary shadow-sm backdrop-blur">
+              Xe mới
+            </span>
+          )}
+          {status === 'RENTING' && (
+            <span className="rounded-full bg-yellow-400/90 px-2.5 py-1 text-xs font-semibold text-yellow-950 shadow-sm">
+              Đang cho thuê
+            </span>
           )}
         </div>
+      </div>
 
-        <h3 className="text-base font-bold capitalize">{name}</h3>
-        <span className="text-xs text-gray-500">
-          <MapPin size={16} className="inline text-black dark:text-white" />{' '}
-          {address}
-        </span>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="line-clamp-1 text-base font-semibold">{name}</h3>
+          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin size={13} className="shrink-0" aria-hidden />
+            <span className="line-clamp-1">{address}</span>
+          </p>
+        </div>
 
-        <div className="my-4 h-[1px] w-full bg-gray-200" />
+        <ul className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {specs.map(({ icon: Icon, label }) => (
+            <li key={label} className="flex items-center gap-1">
+              <Icon size={13} aria-hidden />
+              {label}
+            </li>
+          ))}
+        </ul>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center justify-center gap-3">
-            <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
-              <Image
-                src={'/icons/star-rating-icon.svg'}
-                alt="star rating"
-                width={13}
-                height={13}
-                className="inline"
-              />
-              {rating}
-            </span>
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border pt-3">
+          <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+            {isNew ? (
+              <span>Chưa có chuyến đi</span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <Star size={13} className="fill-yellow-400 text-yellow-400" aria-hidden />
+                <span className="font-medium text-foreground">{rating || '-'}</span>
+                <span>· {trips} chuyến</span>
+              </span>
+            )}
 
-            <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
-              <Image
-                src={'/icons/suitcase-icon.svg'}
-                alt="star rating"
-                width={13}
-                height={13}
-                className="inline"
-              />
-              {trips} chuyến đi
-            </span>
+            {orderDetails.length > 0 && (
+              // Chữ tĩnh thay cho tooltip: tooltip không dùng được trên màn hình cảm ứng
+              <span>
+                {orderDetails.length} lịch đặt sắp tới · gần nhất {formatDateToDMY(orderDetails[0].startDate)}
+              </span>
+            )}
           </div>
-          <span className="text-base font-semibold text-primary">
-            {formatNumberToCurrency(pricePerDay)}
-            <p className="ml-1 inline-block text-xs font-normal text-gray-500">
-              / ngày
+
+          <div className="text-right">
+            <p className="text-lg font-bold leading-none text-primary">
+              {formatNumberToCurrency(pricePerDay)}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">/ ngày</span>
             </p>
-          </span>
+            {days && days > 1 && (
+              <p className={cn('mt-1 text-xs text-muted-foreground')}>
+                {formatCurrency(pricePerDay * days)} / {days} ngày
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </Link>

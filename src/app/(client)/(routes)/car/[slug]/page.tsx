@@ -1,61 +1,35 @@
-'use client';
-
-import { addDays, subDays } from 'date-fns';
 import { AlertCircle, Armchair, Fuel, Info, Settings2 } from 'lucide-react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
-import { DateRange } from 'react-day-picker';
-import { useDispatch } from 'react-redux';
-import { toast } from 'sonner';
-import moment from 'moment';
+import { notFound } from 'next/navigation';
+import React, { cache } from 'react';
 
-import HoverCardCustom from '@/components/cards/hover-card-custom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import JsonLd from '@/components/seo/json-ld';
 import StarRating from '@/components/ui/star-rating';
+import UserAvatar from '@/components/user-avatar';
 import { UserInfoAlertDialog } from '@/components/user-info-alert-dialog';
-import {
-  GET_CAR_BY_SLUG,
-  GET_DISABLE_DATE_BY_CAR_ID,
-} from '@/lib/api-constants';
-import {
-  countDays,
-  formatCurrency,
-  formatDateTimeToAgo,
-  formatDateToDMY,
-} from '@/lib/utils';
-import { API } from '@/services';
-import { addItem } from '@/stores/reducers/cartReducer';
+import { serverFetch, serverFetchOrNull } from '@/lib/server-api';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { formatCurrency, formatDateTimeToAgo } from '@/lib/utils';
+import type { CarDetail } from '@/types/car';
 import { FeatureNameEnum, FuelEnum, TransmissionEnum } from '@/types/enums';
-import StarRatings from 'react-star-ratings';
+
+import BookingPanel from './booking-panel';
+import CarGallery from './car-gallery';
+import MobileBookingBar from './mobile-booking-bar';
+
+// ISR: trang được render ở lần truy cập đầu, cache lại và làm mới tối đa mỗi 60 giây
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return [];
+}
 
 const menuItems = [
-  {
-    name: 'Hình ảnh',
-    href: '#hinh-anh',
-  },
-  {
-    name: 'Đặc điểm',
-    href: '#dac-diem',
-  },
-  {
-    name: 'Giấy tờ thuê xe',
-    href: '#giay-to-thue-xe',
-  },
-  {
-    name: 'Chủ xe',
-    href: '#chu-xe',
-  },
+  { name: 'Hình ảnh', href: '#hinh-anh' },
+  { name: 'Đặc điểm', href: '#dac-diem' },
+  { name: 'Giấy tờ thuê xe', href: '#giay-to-thue-xe' },
+  { name: 'Chủ xe', href: '#chu-xe' },
 ];
 
 const surcharges: { name: string; price: string; description: string }[] = [
@@ -85,108 +59,120 @@ const surcharges: { name: string; price: string; description: string }[] = [
   },
 ];
 
-const CarPage = ({ params }: { params: { slug: string } }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: addDays(new Date(Date.now()), 1),
-    to: addDays(new Date(Date.now()), 2),
-  });
-  const [car, setCar] = useState<any>(null);
-  const [disabledDates, setDisabledDates] = useState<Date[] | Date | undefined>(
-    undefined,
+const rules = [
+  'Sử dụng xe đúng mục đích.',
+  'Không sử dụng xe thuê vào mục đích phi pháp, trái pháp luật.',
+  'Không sử dụng xe thuê để cầm cố, thế chấp.',
+  'Không hút thuốc, nhả kẹo cao su, xả rác trong xe.',
+  'Không chở hàng quốc cấm dễ cháy nổ.',
+  'Không chở hoa quả, thực phẩm nặng mùi trong xe.',
+  'Khi trả xe, nếu xe bẩn hoặc có mùi trong xe, khách hàng vui lòng vệ sinh xe sạch sẽ hoặc gửi phụ thu phí vệ sinh xe.',
+];
+
+type PageProps = { params: Promise<{ slug: string }> };
+
+// cache(): generateMetadata và page dùng chung một lần gọi API trong cùng request
+const getCar = cache((slug: string) =>
+  serverFetchOrNull<CarDetail>(`cars/slug/${encodeURIComponent(slug)}`, {
+    revalidate: 60,
+    tags: ['cars', `car:${slug}`],
+  }),
+);
+
+const getBookedRanges = (carId: number) =>
+  serverFetch<{ startDate: string; endDate: string }[]>(
+    `order-detail/disable-date/car/${carId}`,
+    { revalidate: 30 },
+  ).catch(() => []);
+
+const plainText = (text: string, max = 160) => {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const car = await getCar(slug);
+
+  if (!car) return { title: 'Không tìm thấy xe', robots: { index: false } };
+
+  const title = `Thuê xe ${car.name} tự lái - ${formatCurrency(car.pricePerDay)}/ngày`;
+  const description = plainText(
+    `Thuê xe ${car.name} ${car.seats} chỗ, ${TransmissionEnum[car.transmission]?.toLowerCase() ?? ''}, ${FuelEnum[car.fuel]?.toLowerCase() ?? ''} tại ${car.address}. ${car.description}`,
   );
-  const dispatch = useDispatch();
 
-  const getDisabledDates = async (id: number) => {
-    try {
-      const response = await API.get(GET_DISABLE_DATE_BY_CAR_ID + `/${id}`);
-
-      if (response.status === 200 && response.data.length > 0) {
-        const convertedDateRanges = response.data.map((range: any) => ({
-          after: subDays(new Date(range.startDate), 1),
-          before: addDays(new Date(range.endDate), 1),
-        }));
-
-        setDisabledDates(convertedDateRanges);
-      }
-    } catch (error: any) {
-      toast.error(error?.message);
-    }
+  return {
+    title,
+    description,
+    alternates: { canonical: `/car/${car.slug}` },
+    // Xe chưa được duyệt/tạm ngưng thì không index
+    robots: car.status === 'UNAVAILABLE' ? { index: false, follow: true } : undefined,
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: `/car/${car.slug}`,
+      images: car.images.slice(0, 4).map((url) => ({ url, alt: car.name })),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: car.images.slice(0, 1),
+    },
   };
+}
 
-  const getCar = async () => {
-    const slug = params.slug;
+export default async function CarPage({ params }: PageProps) {
+  const { slug } = await params;
+  const car = await getCar(slug);
 
-    const response = await API.get(GET_CAR_BY_SLUG + `/${slug}`);
+  if (!car) notFound();
 
-    if (response.status === 200) {
-      setCar(response.data);
-
-      getDisabledDates(response.data.id);
-    }
-  };
-
-  useEffect(() => {
-    getCar();
-  }, []);
-
-  // set date from calendar
-  const handleDate = (from: Date | undefined, to: Date | undefined) => {
-    if (!from || !to) return;
-    setDate({ from, to });
-  };
-
-  const handleRentCar = (
-    car: any,
-    startDate: Date | undefined,
-    endDate: Date | undefined,
-    price: number,
-  ) => {
-    setIsLoading(true);
-    try {
-      const user = localStorage.getItem('user');
-
-      const userObj = user ? JSON.parse(user) : undefined;
-
-      if (!userObj) {
-        toast.error('Bạn cần đăng nhập để thuê xe');
-        return;
-      }
-
-      if (!startDate || !endDate) return;
-
-      const startDateString = formatDateToDMY(startDate);
-      const endDateString = formatDateToDMY(endDate);
-
-      const carItem = {
-        carId: Number(car.id),
-        carName: car.name,
-        images: car.images[0],
-        pricePerDay: car.pricePerDay,
-        startDate: startDateString,
-        endDate: endDateString,
-        deposits: price * 0.3,
-        totalAmount: price,
-      };
-
-      dispatch(addItem(carItem));
-    } catch (error: any) {
-      toast.error(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const bookedRanges = await getBookedRanges(car.id);
+  const reviews = car.reviews?.data ?? [];
 
   return (
-    <div className="mb-4">
-      {/*stick menu*/}
-      <nav className="sticky top-[84px] z-[20] mb-14 w-full rounded-lg border border-gray-200 bg-white shadow">
-        <div className="flex items-center justify-start pl-8">
-          {menuItems.map((item, index) => (
+    <div className="mb-4 md:pb-20">
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: car.name,
+          description: plainText(car.description, 500),
+          image: car.images,
+          brand: car.brand ? { '@type': 'Brand', name: car.brand } : undefined,
+          url: `${SITE_URL}/car/${car.slug}`,
+          offers: {
+            '@type': 'Offer',
+            price: car.pricePerDay,
+            priceCurrency: 'VND',
+            availability:
+              car.status === 'AVAILABLE'
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+            seller: { '@type': 'Organization', name: SITE_NAME },
+          },
+          ...(car.reviews.meta.totalReviews > 0 && {
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: car.reviews.meta.average,
+              reviewCount: car.reviews.meta.totalReviews,
+            },
+          }),
+        }}
+      />
+
+      <nav
+        aria-label="Mục lục"
+        className="sticky top-[72px] z-[20] mb-10 w-full overflow-x-auto rounded-xl border border-border bg-card/95 backdrop-blur [scrollbar-width:none] md:top-16 md:mb-6 md:rounded-none md:border-x-0 md:-mx-4 md:w-auto"
+      >
+        <div className="flex w-max min-w-full items-center justify-start px-2">
+          {menuItems.map((item) => (
             <a
               href={item.href}
-              className="inline-block px-4 py-3 font-medium text-gray-700 hover:text-gray-900"
-              key={index}
+              className="inline-block whitespace-nowrap px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              key={item.href}
             >
               {item.name}
             </a>
@@ -194,542 +180,246 @@ const CarPage = ({ params }: { params: { slug: string } }) => {
         </div>
       </nav>
 
-      {/* images */}
-      <div
-        className="mt-4 flex items-center justify-between gap-3"
-        id="hinh-anh"
-      >
-        <div className="h-full overflow-hidden rounded-xl">
-          <Image
-            src={car?.images[0]}
-            alt=""
-            width={854}
-            height={0}
-            style={{
-              objectFit: 'cover',
-              maxWidth: '854px',
-              maxHeight: '600px',
-            }}
-          />
-        </div>
+      <section id="hinh-anh" className="mt-4 scroll-mt-32" aria-label="Hình ảnh xe">
+        <CarGallery images={car.images} name={car.name} />
+      </section>
 
-        <div className="">
-          <div className="flex flex-col items-stretch justify-between gap-3">
-            {car?.images.slice(1, 4).map((image: any, index: number) => (
-              <div
-                className="row-span-1 overflow-hidden rounded-xl"
-                key={index}
-              >
-                <Image
-                  src={image}
-                  alt=""
-                  width={410}
-                  height={190}
-                  style={{
-                    maxWidth: '410px',
-                    maxHeight: '190px',
-                    objectFit: 'cover',
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <div className="mt-6 flex items-start justify-between gap-6 lg:flex-col">
+        <article className="w-2/3 rounded-2xl border border-border bg-card p-8 lg:w-full md:p-5">
+          <header className="flex flex-col items-start justify-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight md:text-2xl">
+              {car.name}
+            </h1>
+            {/* Dấu ngăn cách nằm trong từng mục để khi xuống dòng không còn dấu chấm lơ lửng */}
+            <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground [&>li+li]:before:mr-3 [&>li+li]:before:content-['·']">
+              <li className="flex items-center gap-1">
+                <Image src="/icons/star-rating-icon.svg" alt="" width={16} height={17} />
+                <span>{car.rating || 'Chưa có đánh giá'}</span>
+              </li>
+              <li className="flex items-center gap-1">
+                <Image src="/icons/suitcase-icon.svg" alt="" width={16} height={17} />
+                <span>{car.trips} chuyến</span>
+              </li>
+              <li>{car.address}</li>
+            </ul>
+          </header>
 
-      {/* Car info */}
-      <div className="mt-6 flex items-start justify-between gap-6">
-        <div className="w-2/3 rounded-lg bg-white p-8">
-          {/* info */}
-          <div className="flex flex-col items-start justify-center">
-            <h2 className="text-4xl font-bold">{car?.name}</h2>
-            <div className="flex items-center justify-between gap-3 text-gray-500">
-              <span className="flex items-center justify-center gap-1">
-                <Image
-                  src="/icons/star-rating-icon.svg"
-                  alt=""
-                  width={16}
-                  height={17}
-                />
-                <p>{car?.rating}</p>
-              </span>
-              •
-              <span className="flex items-center justify-center gap-1">
-                <Image
-                  src="/icons/suitcase-icon.svg"
-                  alt=""
-                  width={16}
-                  height={17}
-                />
-                <p>{car?.trips} chuyến</p>
-              </span>
-              •
-              <span className="flex items-center justify-center gap-1">
-                <p>{car?.address}</p>
-              </span>
-            </div>
-          </div>
+          <div className="my-6 h-px w-full bg-border" />
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
-
-          {/* characteristics */}
-          <div className="" id="dac-diem">
-            <h3 className="mb-4 text-xl font-medium">Đặc điểm</h3>
-            <div className="flex items-center justify-between">
+          <section className="scroll-mt-32" id="dac-diem">
+            <h2 className="mb-4 text-xl font-medium">Đặc điểm</h2>
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center justify-center gap-2">
-                <Armchair className="h-8 w-8 text-primary" />
+                <Armchair className="h-8 w-8 text-primary" aria-hidden />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Số ghế</span>
-                  <span className="font-medium">{car?.seats} chỗ</span>
+                  <span className="text-muted-foreground">Số ghế</span>
+                  <span className="font-medium">{car.seats} chỗ</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-center gap-2">
-                <Settings2 className="h-8 w-8 text-primary" />
+                <Settings2 className="h-8 w-8 text-primary" aria-hidden />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Truyền động</span>
-                  <span className="font-medium">
-                    {TransmissionEnum[car?.transmission]}
-                  </span>
+                  <span className="text-muted-foreground">Truyền động</span>
+                  <span className="font-medium">{TransmissionEnum[car.transmission]}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-center gap-2">
-                <Fuel className="h-8 w-8 text-primary" />
+                <Fuel className="h-8 w-8 text-primary" aria-hidden />
                 <div className="flex flex-col items-center justify-between text-base">
-                  <span className="text-gray-500">Nhiên liệu</span>
-                  <span className="font-medium">{FuelEnum[car?.fuel]}</span>
+                  <span className="text-muted-foreground">Nhiên liệu</span>
+                  <span className="font-medium">{FuelEnum[car.fuel]}</span>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* description */}
-          <div className="">
-            <h3 className="mb-4 text-xl font-medium">Mô tả</h3>
-            <div>
-              <p className="text-align text-base text-gray-600">
-                {car?.description}
-              </p>
-            </div>
-          </div>
+          <section>
+            <h2 className="mb-4 text-xl font-medium">Mô tả</h2>
+            <p className="whitespace-pre-line text-base text-muted-foreground">
+              {car.description}
+            </p>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* features */}
-          <div className="">
-            <h3 className="mb-4 text-xl font-medium">Tính năng</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {car?.CarFeature.map((feature: string, index: number) => (
-                <span
-                  className="col-span-1 cursor-pointer rounded border border-gray-300 px-3 py-2 text-center shadow hover:scale-105"
-                  key={index}
+          <section>
+            <h2 className="mb-4 text-xl font-medium">Tính năng</h2>
+            <ul className="grid grid-cols-4 gap-3 md:grid-cols-2">
+              {car.CarFeature.map((feature) => (
+                <li
+                  className="col-span-1 rounded-lg border border-border bg-background px-3 py-2 text-center text-base text-muted-foreground"
+                  key={feature}
                 >
-                  <p className="text-base text-gray-600">
-                    {FeatureNameEnum[feature]}
-                  </p>
-                </span>
+                  {FeatureNameEnum[feature] ?? feature}
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* Giấy tờ thuê xe */}
-          <div className="" id="giay-to-thue-xe">
-            <div className="flex items-center justify-start gap-2">
-              <h3 className="mb-4 text-xl font-medium">Giấy tờ thuê xe</h3>
-            </div>
-            <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4">
+          <section className="scroll-mt-32" id="giay-to-thue-xe">
+            <h2 className="mb-4 text-xl font-medium">Giấy tờ thuê xe</h2>
+            <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4 dark:bg-orange-500/10">
               <div className="flex items-center justify-start gap-2">
-                <Info className="h-4 w-4 text-gray-600" />
-                <span className="text-xs text-gray-500">
-                  Chọn 1 trong 2 hình thức
-                </span>
+                <Info className="h-4 w-4 text-muted-foreground" aria-hidden />
+                <span className="text-xs text-muted-foreground">Chọn 1 trong 2 hình thức</span>
               </div>
 
               <div className="my-3 flex items-center justify-start gap-2">
-                <Image
-                  src="/images/gplx_cccd.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span className="text-base font-medium text-gray-900">
+                <Image src="/images/gplx_cccd.png" alt="" width={24} height={24} />
+                <span className="text-base font-medium text-foreground">
                   GPLX & CCCD gắn chip (đối chiếu)
                 </span>
               </div>
 
               <div className="flex items-center justify-start gap-2">
-                <Image
-                  src="/images/gplx_passport.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span className="text-base font-medium text-gray-900">
+                <Image src="/images/gplx_passport.png" alt="" width={24} height={24} />
+                <span className="text-base font-medium text-foreground">
                   GPLX (đối chiếu) & Passport (giữ lại)
                 </span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* Tài sản thế chấp */}
-          <div className="">
-            <h3 className="mb-4 text-xl font-medium">Tài sản thế chấp</h3>
-            <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4">
-              <div className="flex items-center justify-start gap-2">
-                <span className="text-base text-gray-800">
-                  15 triệu (tiền mặt/chuyển khoản cho chủ xe khi nhận xe) hoặc
-                  Xe máy (kèm cà vẹt gốc) giá trị 15 triệu
-                </span>
-              </div>
+          <section>
+            <h2 className="mb-4 text-xl font-medium">Tài sản thế chấp</h2>
+            <div className="rounded-lg border-l-4 border-orange-500 bg-orange-100/50 p-4 text-base text-foreground dark:bg-orange-500/10">
+              15 triệu (tiền mặt/chuyển khoản cho chủ xe khi nhận xe) hoặc Xe máy
+              (kèm cà vẹt gốc) giá trị 15 triệu
             </div>
-          </div>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* Điều khoản */}
-          <div className="">
-            <h3 className="mb-4 text-xl font-medium">Điều khoản</h3>
-
-            <div className="text-gray-500">
+          <section>
+            <h2 className="mb-4 text-xl font-medium">Điều khoản</h2>
+            <div className="text-muted-foreground">
               <span>Quy định khác:</span>
               <ul className="pl-6">
-                <li className="list-disc">Sử dụng xe đúng mục đích.</li>
-                <li className="list-disc">
-                  Không sử dụng xe thuê vào mục đích phi pháp, trái pháp luật.
-                </li>
-                <li className="list-disc">
-                  Không sử dụng xe thuê để cầm cố, thế chấp.
-                </li>
-                <li className="list-disc">
-                  Không hút thuốc, nhả kẹo cao su, xả rác trong xe.
-                </li>
-                <li className="list-disc">
-                  Không chở hàng quốc cấm dễ cháy nổ.
-                </li>
-                <li className="list-disc">
-                  Không chở hoa quả, thực phẩm nặng mùi trong xe.
-                </li>
-                <li className="list-disc">
-                  Khi trả xe, nếu xe bẩn hoặc có mùi trong xe, khách hàng vui
-                  lòng vệ sinh xe sạch sẽ hoặc gửi phụ thu phí vệ sinh xe.
-                </li>
+                {rules.map((rule) => (
+                  <li className="list-disc" key={rule}>
+                    {rule}
+                  </li>
+                ))}
               </ul>
               <span>
-                Trân trọng cảm ơn, chúc quý khách hàng có những chuyến đi tuyệt
-                vời !{' '}
+                Trân trọng cảm ơn, chúc quý khách hàng có những chuyến đi tuyệt vời!
               </span>
             </div>
-          </div>
+          </section>
 
-          <div className="my-6 h-[1px] w-full bg-gray-300" />
+          <div className="my-6 h-px w-full bg-border" />
 
-          {/* chu xe */}
-          <div className="" id="chu-xe">
-            <div className="">
-              <h3 className="mb-4 text-xl font-medium">Chủ xe</h3>
+          <section className="scroll-mt-32" id="chu-xe">
+            <h2 className="mb-4 text-xl font-medium">Chủ xe</h2>
 
-              {/* info chu xe */}
+            {car.owner && (
               <div className="flex items-center justify-start gap-3">
-                {car?.owner && (
-                  <>
-                    <UserInfoAlertDialog
-                      userId={car?.owner?.id}
-                      avatarUrl={car?.owner?.avatarUrl}
-                    />
-
-                    <div className="flex flex-col items-start justify-center">
-                      <h4 className="text-2xl font-bold">{car?.owner?.name}</h4>
-                    </div>
-                  </>
-                )}
+                <UserInfoAlertDialog userId={car.owner.id} avatarUrl={car.owner.avatarUrl} name={car.owner.name} />
+                <p className="text-2xl font-bold">{car.owner.name}</p>
               </div>
+            )}
 
-              {/* danh gia */}
-              {car?.reviews?.meta?.totalReviews === 0 ? (
-                <div className="flex w-full flex-col items-center justify-between">
-                  <Image
-                    src="/images/empty-review.svg"
-                    alt="empty-review"
-                    width={340}
-                    height={340}
-                  />
-
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <p className="text-xl font-medium">Chưa có đánh giá</p>
-                    <p className="text-gray-500">
-                      Hãy là người đầu tiên đánh giá chủ xe
-                    </p>
-                  </div>
+            {reviews.length === 0 ? (
+              <div className="flex w-full flex-col items-center justify-between">
+                <Image
+                  src="/images/empty-review.svg"
+                  alt=""
+                  width={240}
+                  height={240}
+                />
+                <p className="text-xl font-medium">Chưa có đánh giá</p>
+                <p className="text-muted-foreground">Hãy là người đầu tiên đánh giá chủ xe</p>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <div className="flex items-center justify-start gap-2">
+                  <span className="flex items-center justify-start gap-1">
+                    <Image src="/icons/star-rating-icon.svg" alt="" width={16} height={17} />
+                    <span>{car.reviews.meta.average}</span>
+                  </span>
+                  <span className="h-1 w-1 rounded-full bg-foreground" />
+                  <span className="text-foreground/80">
+                    {car.reviews.meta.totalReviews} đánh giá
+                  </span>
                 </div>
-              ) : (
-                <div className="mt-4">
-                  <div className="flex items-center justify-start gap-2">
-                    <span className="flex items-center justify-start gap-1">
-                      <Image
-                        src="/icons/star-rating-icon.svg"
-                        alt=""
-                        width={16}
-                        height={17}
-                      />
-                      <p>{car?.reviews?.meta?.average}</p>
-                    </span>
 
-                    <div className="h-1 w-1 rounded-full bg-black" />
+                <ul className="mt-4">
+                  {reviews.map((review) => (
+                    <li
+                      className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-border px-8 py-6 md:px-4"
+                      key={review.id}
+                    >
+                      <div className="flex items-center justify-start gap-3">
+                        <UserAvatar
+                          name={review.customer.name}
+                          src={review.customer.avatarUrl}
+                          className="h-12 w-12"
+                        />
 
-                    <span className="text-gray-700">
-                      {car?.reviews?.meta?.totalReviews} đánh giá
-                    </span>
-                  </div>
-
-                  {/* review */}
-                  <div className="mt-4">
-                    {car?.reviews?.data &&
-                      car?.reviews?.data.map((review: any, index: number) => (
-                        <>
-                          {review && (
-                            <div
-                              className="mt-4 flex items-center justify-between rounded-lg border border-gray-300 px-8 py-6"
-                              key={index}
-                            >
-                              <div className="flex items-center justify-start gap-3">
-                                <Avatar className="h-16 w-16">
-                                  <AvatarImage
-                                    src={review.customer.avatarUrl}
-                                    alt="avatar"
-                                  />
-                                  <AvatarFallback>Avatar</AvatarFallback>
-                                </Avatar>
-
-                                <div className="flex flex-col items-start justify-center">
-                                  <h4 className="text-lg font-bold">
-                                    {review.customer.name}
-                                  </h4>
-
-                                  <div>
-                                    <span className="mb-2 flex items-center justify-center gap-1">
-                                      <StarRatings
-                                        rating={review.rating}
-                                        starRatedColor="yellow"
-                                        starDimension="15px"
-                                      />
-                                    </span>
-                                    <span>{review.content}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="">
-                                {formatDateTimeToAgo(review?.createdAt)}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* tinh tien */}
-        <div className="w-1/3">
-          {/* gia tien */}
-          <div className="flex flex-col items-start justify-between gap-3 rounded-lg bg-sky-100/50 p-8">
-            {/* header */}
-            <div className="flex items-center justify-start gap-2">
-              <h3 className="text-2xl font-bold">
-                {formatCurrency(car?.pricePerDay)}/ngày
-              </h3>
-              <HoverCardCustom content="Giá thuê xe được tính theo ngày, thời gian thuê ít hơn 24 tiếng sẽ được tính tròn 1 ngày. Giá thuê xe không bao gồm tiền xăng. Khi kết thúc chuyến đi, bạn vui lòng đổ xăng về lại mức ban đầu như khi nhận xe" />
-            </div>
-
-            {/* thoi gian thue */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <div className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-primary bg-white p-4">
-                  {/* nhan xe */}
-                  <div className="">
-                    <span className="flex flex-col items-start justify-between gap-1 text-gray-700">
-                      Nhận xe
-                    </span>
-                    {date?.from && (
-                      <span className="font-medium">
-                        {formatDateToDMY(date?.from)}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="h-12 w-[1px] bg-primary" />
-
-                  {/* tra xe */}
-                  <div className="">
-                    <span className="flex flex-col items-start justify-between gap-1 text-gray-700">
-                      Trả xe
-                    </span>
-                    {date?.to && (
-                      <span className="font-medium">
-                        {formatDateToDMY(date?.to)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="w-auto">
-                <DialogHeader>
-                  <DialogTitle>Thời gian</DialogTitle>
-                </DialogHeader>
-                <div className="">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                    fromDate={addDays(new Date(Date.now()), 1)}
-                    disabled={disabledDates}
-                  />
-                </div>
-                <DialogFooter className="border-t-2 border-gray-200 py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col items-start justify-center">
-                      <div className="flex items-center justify-center gap-2 font-medium">
-                        {date?.from && date?.to && (
-                          <span>
-                            {formatDateToDMY(date?.from)} -{' '}
-                            {formatDateToDMY(date?.to)}
-                          </span>
-                        )}
+                        <div className="flex flex-col items-start justify-center gap-1">
+                          <p className="text-lg font-bold">{review.customer.name}</p>
+                          <StarRating rating={review.rating} />
+                          <p>{review.content}</p>
+                        </div>
                       </div>
-                      {date?.from && date?.to && (
-                        <span className="text-md flex items-center justify-center gap-1 text-gray-700">
-                          Số ngày thuê:{' '}
-                          <p className="font-bold">
-                            {countDays(date?.from, date?.to)}
-                          </p>{' '}
-                          ngày
-                        </span>
-                      )}
-                    </div>
 
-                    <DialogClose asChild>
-                      <Button
-                        type="submit"
-                        className=""
-                        onClick={() => handleDate(date?.from, date?.to)}
+                      <time
+                        dateTime={review.createdAt}
+                        className="shrink-0 text-sm text-muted-foreground"
                       >
-                        Xác nhận
-                      </Button>
-                    </DialogClose>
-                  </div>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* dia diem nhan xe */}
-            <div className="flex w-full flex-col items-start justify-between gap-2 rounded-xl border border-primary bg-white p-4">
-              <h5 className="text-sm text-gray-700">Địa điểm giao xe</h5>
-              <span className="font-bold">{car?.address}</span>
-              <span className="text-xs text-gray-500 ">
-                *Chủ xe không hỗ trợ giao xe tận nơi
-              </span>
-            </div>
-
-            <div className="my-4 h-[1px] w-full bg-gray-400" />
-
-            {/* tong tien */}
-            <div className="w-full">
-              <div className="flex w-full items-center justify-between">
-                <h5 className="">Tổng cộng</h5>
-                <span className="font-bold">
-                  {formatCurrency(car?.pricePerDay)} x{' '}
-                  {countDays(date?.from, date?.to)} ngày
-                </span>
+                        {formatDateTimeToAgo(new Date(review.createdAt))}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
+          </section>
+        </article>
 
-            {/* thanh tien */}
-            <div className="w-full">
-              <div className="flex w-full items-center justify-between">
-                <h5 className="font-bold">Thành tiền</h5>
-                <span className="font-bold">
-                  {formatCurrency(
-                    car?.pricePerDay * countDays(date?.from, date?.to),
-                  )}
-                </span>
-              </div>
-            </div>
+        <aside id="dat-xe" className="sticky top-[140px] w-1/3 scroll-mt-24 lg:static lg:w-full">
+          <BookingPanel
+            car={{
+              id: car.id,
+              name: car.name,
+              slug: car.slug,
+              pricePerDay: car.pricePerDay,
+              address: car.address,
+              image: car.images[0],
+              status: car.status,
+            }}
+            bookedRanges={bookedRanges}
+          />
 
-            <div className="my-4 h-[1px] w-full bg-gray-400" />
+          <div className="mt-6 w-full rounded-lg border border-border p-3">
+            <h2 className="mb-3 font-semibold text-primary">Phụ phí có thể phát sinh</h2>
 
-            {/* tiền cọc */}
-            <div className="w-full">
-              <span className="text-xs text-error">
-                *Bạn chỉ cần thanh toán trước 30% tiền cọc khi đặt xe
-              </span>
-              <div className="flex w-full items-center justify-between">
-                <h5 className="font-bold">Thanh toán tiền cọc</h5>
-                <span className="font-bold">
-                  {formatCurrency(
-                    car?.pricePerDay * countDays(date?.from, date?.to) * 0.3,
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              className="w-full rounded-full"
-              size="lg"
-              onClick={() =>
-                handleRentCar(
-                  car,
-                  date?.from,
-                  date?.to,
-                  car?.pricePerDay * countDays(date?.from, date?.to),
-                )
-              }
-              isLoading={isLoading}
-            >
-              Chọn thuê
-            </Button>
-          </div>
-
-          {/*  Phụ phí có thể phát sinh  */}
-          <div className="mt-6 w-full rounded-lg border border-gray-300 p-3">
-            <h5 className="mb-3 font-semibold text-primary">
-              Phụ phí có thể phát sinh
-            </h5>
-
-            <div className="w-full">
-              {surcharges.map((surcharge, index) => (
-                <div
-                  className="mb-2 flex items-start justify-start gap-2 text-xs"
-                  key={index}
-                >
-                  <AlertCircle size={14} className="text-gray-500" />
+            <ul className="w-full">
+              {surcharges.map((surcharge) => (
+                <li className="mb-2 flex items-start justify-start gap-2 text-xs" key={surcharge.name}>
+                  <AlertCircle size={14} className="text-muted-foreground" aria-hidden />
                   <div className="w-full">
                     <div className="flex items-center justify-between font-bold">
                       <span>{surcharge.name}</span>
                       <span>{surcharge.price}</span>
                     </div>
-                    <p className="text-gray-500">{surcharge.description}</p>
+                    <p className="text-muted-foreground">{surcharge.description}</p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
-        </div>
+        </aside>
       </div>
+      <MobileBookingBar pricePerDay={car.pricePerDay} available={car.status === 'AVAILABLE'} />
     </div>
   );
-};
-
-export default CarPage;
+}

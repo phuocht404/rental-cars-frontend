@@ -9,7 +9,7 @@ const Logo = () => {
     <>
       <TooltipCustom content="Rental Cars">
         <Link href="/" className="">
-          <Image src="/images/logo.png" alt="logo" width={100} height={48.44} />
+          <Image src="/images/logo.png" alt="Rental Cars" width={100} height={48.44} />
         </Link>
       </TooltipCustom>
     </>

@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { ReviewSchema } from '@/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -13,19 +12,16 @@ import {
   FormItem,
   FormMessage,
 } from '../ui/form';
-import StarRatings from 'react-star-ratings';
+import { Star } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 const ReviewForm = ({
-  orderDetailId,
-  setIsOpen,
   onSubmit,
 }: {
-  orderDetailId: number;
-  setIsOpen: any;
+  orderDetailId?: number;
+  setIsOpen?: any;
   onSubmit: (values: z.infer<typeof ReviewSchema>) => Promise<void>;
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof ReviewSchema>>({
     resolver: zodResolver(ReviewSchema),
@@ -41,17 +37,32 @@ const ReviewForm = ({
             render={({ field }) => (
               <FormItem className="w-full text-center">
                 <FormControl>
-                  <StarRatings
-                    rating={field.value}
-                    starRatedColor="yellow"
-                    starHoverColor="yellow"
-                    changeRating={(newRating) => {
-                      field.onChange(newRating);
-                    }}
-                    numberOfStars={5}
-                    name="rating"
-                    starDimension="25px"
-                  />
+                  <div
+                    role="radiogroup"
+                    aria-label="Số sao đánh giá"
+                    className="flex items-center justify-center gap-2"
+                  >
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        role="radio"
+                        aria-checked={field.value === star}
+                        aria-label={`${star} sao`}
+                        onClick={() => field.onChange(star)}
+                        className="rounded transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Star
+                          size={28}
+                          className={
+                            (field.value ?? 0) >= star
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-muted-foreground'
+                          }
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -77,7 +88,7 @@ const ReviewForm = ({
         </div>
 
         <div className="text-right">
-          <Button type="submit" className="w-44 px-8" isLoading={isLoading}>
+          <Button type="submit" className="w-44 px-8" isLoading={form.formState.isSubmitting}>
             Đánh giá
           </Button>
         </div>

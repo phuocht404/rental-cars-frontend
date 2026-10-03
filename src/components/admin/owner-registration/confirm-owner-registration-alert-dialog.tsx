@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import {
   AlertDialog,
@@ -15,7 +15,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
 import { UPDATE_REQUEST_OWNER_REGISTRATION } from '@/lib/api-constants';
 
@@ -32,7 +34,7 @@ const ConfirmOwnerRegistrationAlertDialog = ({
   isConfirm,
   className,
 }: ConfirmOwnerRegistrationAlertDialogProps) => {
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const updateRole = async () => {
     try {
@@ -47,11 +49,12 @@ const ConfirmOwnerRegistrationAlertDialog = ({
 
       if (res.status === 200) {
         toast.success('Cập nhật thành công');
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminOwnerRegistrations });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers });
       }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setLoading(false);
     }
   };
 

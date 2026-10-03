@@ -20,7 +20,7 @@ const BackButton = ({ className }: { className?: string }) => {
       )}
       onClick={handleBack}
     >
-      <ChevronLeft size={20} className="text-gray-500" />
+      <ChevronLeft size={20} className="text-muted-foreground" />
     </Button>
   );
 };

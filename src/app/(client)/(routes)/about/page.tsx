@@ -1,5 +1,9 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import React from 'react';
+
+import SectionHeading from '@/components/home/SectionHeading';
+import Reveal from '@/components/reveal';
 
 const advantageList: {
   icon: string;
@@ -34,55 +38,79 @@ const advantageList: {
   },
 ];
 
+export const metadata: Metadata = {
+  title: 'Giới thiệu',
+  description: 'Rental Cars - nền tảng kết nối chủ xe và khách thuê xe tự lái tại Đà Nẵng.',
+  alternates: { canonical: '/about' },
+};
+
 const AboutPage = () => {
   return (
-    <div className="mt-8">
-      <div className="flex animate-[slideInFromTop] flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-4 py-8 duration-1000 ease-out">
-        <h2 className="max-w-[440px] text-6xl font-medium text-black lg:w-full lg:max-w-full">
-          Rental Cars - Cùng bạn đến mọi hành trình
-        </h2>
-        <div className="max-w-[776px] lg:w-full lg:max-w-full">
-          <span className="block text-justify text-lg text-gray-700">
+    <div className="flex flex-col gap-16">
+      <section className="animate-fade-up">
+        <h1 className="max-w-[18ch] text-5xl font-bold leading-[1.1] tracking-tight lg:text-4xl md:text-3xl">
+          Rental Cars, cùng bạn đến mọi hành trình
+        </h1>
+
+        <div className="mt-8 grid max-w-[900px] grid-cols-2 gap-8 md:grid-cols-1">
+          <p className="text-base leading-relaxed text-muted-foreground">
             Mỗi chuyến đi là một hành trình khám phá cuộc sống và thế giới xung
             quanh, là cơ hội học hỏi và chinh phục những điều mới lạ của mỗi cá
             nhân để trở nên tốt hơn. Do đó, chất lượng trải nghiệm của khách
-            hàng là ưu tiên hàng đầu và là nguồn cảm hứng của đội ngũ MIOTO.
-          </span>
-          <span className="mt-4 block text-justify text-lg text-gray-700">
+            hàng là ưu tiên hàng đầu và là nguồn cảm hứng của đội ngũ Rental
+            Cars.
+          </p>
+          <p className="text-base leading-relaxed text-muted-foreground">
             Rental Cars là nền tảng chia sẻ ô tô, sứ mệnh của chúng tôi không
-            chỉ dừng lại ở việc kết nối chủ xe và khách hàng một cách Nhanh
-            chóng - An toàn - Tiện lợi, mà còn hướng đến việc truyền cảm hứng
-            KHÁM PHÁ những điều mới lạ đến cộng đồng qua những chuyến đi trên
-            nền tảng của chúng tôi.
-          </span>
+            chỉ dừng lại ở việc kết nối chủ xe và khách hàng một cách nhanh
+            chóng, an toàn, tiện lợi, mà còn hướng đến việc truyền cảm hứng khám
+            phá những điều mới lạ đến cộng đồng qua những chuyến đi trên nền
+            tảng của chúng tôi.
+          </p>
         </div>
-      </div>
+      </section>
 
-      <Image
-        src={'/images/banner-about.png'}
-        alt=""
-        width={1280}
-        height={519}
-        className="animation-[slideInFromLeft] mt-10 duration-1000 ease-out"
-      />
+      <Reveal>
+        <Image
+          src="/images/banner-about.webp"
+          alt="Khách hàng cùng chiếc xe thuê trên hành trình"
+          width={1280}
+          height={519}
+          className="h-auto w-full rounded-2xl object-cover"
+        />
+      </Reveal>
 
-      <div className="mt-10 text-center">
-        <h3 className="mb-6 text-4xl font-semibold">
-          Rental Cars và những con số
-        </h3>
-        <ul className="grid grid-cols-3 gap-4 md:grid-cols-2">
+      <section>
+        <SectionHeading
+          title="Rental Cars và những con số"
+          description="Những con số đến từ cộng đồng chủ xe và khách thuê trên nền tảng."
+          className="mb-8"
+        />
+
+        <ul className="grid grid-cols-3 gap-4 md:grid-cols-1">
           {advantageList.map(({ icon, statistical, description }, index) => (
-            <li
-              key={index}
-              className="col-span-1 flex max-w-[426px] flex-col items-center justify-start gap-2 px-3"
-            >
-              <Image src={icon} alt={icon} width={60} height={61} />
-              <span className="text-xl font-semibold">{statistical}</span>
-              <span className="px-8">{description}</span>
+            <li key={statistical}>
+              <Reveal
+                delay={(index % 3) * 80}
+                className="flex h-full flex-col items-start gap-3 rounded-2xl border border-border bg-card p-6"
+              >
+                <Image
+                  src={icon}
+                  alt=""
+                  width={44}
+                  height={44}
+                />
+                <span className="text-3xl font-bold tracking-tight text-primary">
+                  {statistical}
+                </span>
+                <span className="text-sm leading-relaxed text-muted-foreground">
+                  {description}
+                </span>
+              </Reveal>
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     </div>
   );
 };

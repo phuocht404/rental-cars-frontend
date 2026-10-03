@@ -1,27 +1,36 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** Khung chờ cho bảng dữ liệu: thanh công cụ, các hàng và phân trang. */
 const TableSkeleton = () => {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center justify-between gap-2">
-          <Skeleton className="h-[32px] w-[250px] rounded" />
-          <Skeleton className="h-[31px] w-[112px] rounded" />
-          <Skeleton className="h-[31px] w-[112px] rounded" />
+    <div className="space-y-4" aria-hidden="true">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Skeleton className="h-9 w-[250px] md:w-full" />
+          <Skeleton className="h-9 w-28" />
+          <Skeleton className="h-9 w-28" />
         </div>
-        <Skeleton className="h-[31px] w-[77px] rounded" />
+        <Skeleton className="h-9 w-20" />
       </div>
 
-      <Skeleton className="h-[484px] w-[1232px] rounded" />
+      <div className="overflow-hidden rounded-xl border border-border">
+        <Skeleton className="h-11 w-full rounded-none" />
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 border-t border-border p-4"
+          >
+            <Skeleton className="h-4 w-1/6" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/5" />
+            <Skeleton className="ml-auto h-4 w-16" />
+          </div>
+        ))}
+      </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <Skeleton className="h-[21px] w-[150px]" />
-
-        <div className="flex items-center justify-between gap-4">
-          <Skeleton className="h-[32px] w-[129px] rounded" />
-          <Skeleton className="h-[20px] w-[100px] rounded" />
-          <Skeleton className="h-[32px] w-[152px] rounded" />
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Skeleton className="h-5 w-36" />
+        <Skeleton className="h-9 w-56" />
       </div>
     </div>
   );

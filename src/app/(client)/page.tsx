@@ -1,61 +1,48 @@
-'use client';
-
-import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import type { Metadata } from 'next';
+import React, { Suspense } from 'react';
 
 import Advantage from '@/components/home/Advantage';
 import CarRentalInstructions from '@/components/home/CarRentalInstructions';
 import Explorer from '@/components/home/Explorer';
-import FeaturedCar from '@/components/home/FeaturedCar';
+import FeaturedCar, { FeaturedCarSkeleton } from '@/components/home/FeaturedCar';
+import HeroCarousel from '@/components/home/HeroCarousel';
 import SearchBox from '@/components/home/SearchBox';
+import JsonLd from '@/components/seo/json-ld';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 
-const bannerImgList: string[] = [
-  '/images/banner-img1.png',
-  '/images/banner-img2.png',
-  '/images/banner-img3.png',
-  '/images/banner-img4.png',
-];
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: { absolute: `${SITE_NAME} - Thuê xe tự lái tại Đà Nẵng` },
+  alternates: { canonical: '/' },
+};
 
 const HomePage = () => {
-  const [bannerImg, setBannerImg] = useState<string>(bannerImgList[0]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBannerImg(
-        bannerImgList[Math.floor(Math.random() * bannerImgList.length)],
-      );
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="mt-6">
-      {/* Banner */}
-      <div className="relative flex h-auto max-h-[600px] w-auto items-center justify-center overflow-hidden rounded-xl bg-primary/10">
-        <Image
-          src={bannerImg}
-          width={1280}
-          height={600}
-          alt="banner"
-          style={{ objectFit: 'cover' }}
-        />
-        <div className="absolute flex flex-col items-center justify-center">
-          <h1 className="text-4xl font-bold text-white">
-            Trãi nghiệm thuê xe cùng{' '}
-            <span className="text-primary">Rental Cars</span>
-          </h1>
-          <div className="my-4 h-[1px] w-3/5 bg-white" />
-          <p className="text-lg text-white">
-            Nền tảng cho thuê xe ô tô tại Đà Nẵng
-          </p>
-        </div>
-      </div>
+    <div>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: SITE_NAME,
+          url: SITE_URL,
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${SITE_URL}/search?startDate={startDate}&endDate={endDate}`,
+            'query-input': 'required name=startDate',
+          },
+        }}
+      />
 
-      <div className="relative">
+      <HeroCarousel />
+
+      <div id="search" className="relative z-10 -mt-12 scroll-mt-24 px-16 xl:px-8 md:px-2">
         <SearchBox />
       </div>
 
-      <FeaturedCar />
+      <Suspense fallback={<FeaturedCarSkeleton />}>
+        <FeaturedCar />
+      </Suspense>
 
       <Advantage />
 

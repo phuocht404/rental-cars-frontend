@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import UpdateStatusAlertDialog from '@/components/admin/cars/update-status-alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -22,14 +22,9 @@ const StatusCombobox = ({
   carId: number;
 }) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<{
-    key: string;
-    value: string;
-  }>(statusInit);
+  // Trạng thái hiện tại lấy thẳng từ props; danh sách tự làm mới sau khi đổi trạng thái
+  const value: { key: string; value: string } = statusInit;
 
-  useEffect(() => {
-    setValue(value);
-  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

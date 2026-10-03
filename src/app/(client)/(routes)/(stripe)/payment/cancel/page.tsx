@@ -1,22 +1,44 @@
 import { BadgeAlert } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import React from 'react';
 
-const PaymentCancelPage = () => {
-  return (
-    <div className="my-10 flex items-center justify-center text-gray-500">
-      <div className="rounded-2xl bg-transparent shadow-xl">
-        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-100 bg-white px-20 py-8">
-          <BadgeAlert className="h-16 w-16 text-error" />
-          <h1 className="text-center text-3xl font-bold text-error">
-            Thanh toán thất bại
-          </h1>
-          <p className="text-center text-sm dark:text-gray-500">
-            Vui lòng thử lại sau
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+import StatusPanel from '@/components/StatusPanel';
+import { Button } from '@/components/ui/button';
+
+import CancelCheckout from './cancel-checkout';
+
+export const metadata: Metadata = {
+  title: 'Huỷ thanh toán',
+  robots: { index: false, follow: false },
 };
 
-export default PaymentCancelPage;
+export default async function PaymentCancelPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const { session_id: sessionId } = await searchParams;
+
+  return (
+    <>
+      {sessionId && <CancelCheckout sessionId={sessionId} />}
+      <StatusPanel
+        tone="error"
+        icon={<BadgeAlert />}
+        title="Bạn đã huỷ thanh toán"
+        description="Xe trong giỏ hàng vẫn được giữ lại, bạn có thể thanh toán lại bất cứ lúc nào."
+        actions={
+          <>
+            <Link href="/">
+              <Button variant="outline">Về trang chủ</Button>
+            </Link>
+            <Link href="/search">
+              <Button>Chọn xe khác</Button>
+            </Link>
+          </>
+        }
+      />
+    </>
+  );
+}

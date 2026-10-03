@@ -25,7 +25,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { cn, formatDateToDMY } from '@/lib/utils';
+import { apiErrorMessage, useUpdateProfile } from '@/components/profile/use-update-profile';
+import { cn } from '@/lib/utils';
 import { editProfileSchema } from '@/schemas/';
 
 const genders: { key: string; value: string }[] = [
@@ -47,24 +48,41 @@ const EditProfileForm = ({
   name,
   dateOfBirth,
   gender,
+  onSuccess,
 }: {
-  name: string;
-  dateOfBirth: Date;
-  gender: string;
+  name?: string | null;
+  dateOfBirth?: string | Date | null;
+  gender?: string | null;
+  onSuccess?: () => void;
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const updateProfile = useUpdateProfile();
 
   const form = useForm<z.infer<typeof editProfileSchema>>({
     resolver: zodResolver(editProfileSchema),
+    defaultValues: {
+      name: name ?? '',
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+      gender: (gender as any) ?? undefined,
+    },
   });
 
   async function onSubmit(values: z.infer<typeof editProfileSchema>) {
+    setIsLoading(true);
     try {
-      console.log(values);
+      await updateProfile({
+        name: values.name,
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth
+          ? format(values.dateOfBirth, 'yyyy-MM-dd')
+          : undefined,
+      });
+      toast.success('Cập nhật thông tin thành công');
+      onSuccess?.();
     } catch (error: any) {
-      toast.error(error?.error, { description: error?.message });
+      toast.error(apiErrorMessage(error));
     } finally {
-      setIsLoading(true);
+      setIsLoading(false);
     }
   }
 
@@ -78,7 +96,7 @@ const EditProfileForm = ({
             <FormItem>
               <FormLabel>Họ tên:</FormLabel>
               <FormControl>
-                <Input {...field} value={name} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,7 +121,7 @@ const EditProfileForm = ({
                     >
                       {field.value
                         ? format(field.value, 'dd/MM/yyyy')
-                        : formatDateToDMY(dateOfBirth)}
+                        : 'Chọn ngày sinh'}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -111,6 +129,9 @@ const EditProfileForm = ({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
+                    captionLayout="dropdown-buttons"
+                    fromYear={1940}
+                    toYear={new Date().getFullYear()}
                     selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) =>
@@ -142,17 +163,14 @@ const EditProfileForm = ({
                         !field.value && 'text-muted-foreground',
                       )}
                     >
-                      {field.value ? (
-                        genders.find((gender) => gender.value === field.value)
-                          ?.value
-                      ) : (
-                        <p>{gender}</p>
-                      )}
+                      {field.value
+                        ? genders.find((item) => item.key === field.value)?.value
+                        : 'Chọn giới tính'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-[450px] p-0">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                   <Command>
                     <CommandGroup>
                       {genders.map(({ key, value }) => (
@@ -160,14 +178,14 @@ const EditProfileForm = ({
                           value={key}
                           key={key}
                           onSelect={() => {
-                            form.setValue('gender', value);
+                            form.setValue('gender', key as any);
                           }}
                           className="font-base"
                         >
                           <Check
                             className={cn(
                               'mr-2 h-4 w-4',
-                              value === field.value
+                              key === field.value
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )}

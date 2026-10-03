@@ -2,11 +2,14 @@
 
 import { ChevronLeftIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react';
 
 import { CreateUserForm } from '@/components/admin/forms/create-user.form';
 import { Button } from '@/components/ui/button';
 
-export default function AddUserPage({ params }: { params: { slug: string } }) {
+// Next 16: params là Promise, phải unwrap bằng use() trong client component
+export default function AddUserPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const router = useRouter();
 
   return (
@@ -21,13 +24,13 @@ export default function AddUserPage({ params }: { params: { slug: string } }) {
           <ChevronLeftIcon className="h-5 w-5" />
         </Button>
         <h2 className="inline text-2xl font-bold">
-          {params?.slug === 'new' ? 'Thêm' : 'Cập nhật'} người dùng
+          {slug === 'new' ? 'Thêm' : 'Cập nhật'} người dùng
         </h2>
       </div>
 
       <div className="flex items-center justify-center">
         <div className="w-4/5">
-          <CreateUserForm slug={params?.slug} />
+          <CreateUserForm slug={slug} />
         </div>
       </div>
     </div>

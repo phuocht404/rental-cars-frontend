@@ -1,11 +1,9 @@
 'use client';
 
-import { loadStripe } from '@stripe/stripe-js';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import LoadingScreen from '@/components/loading-screen';
@@ -24,61 +22,38 @@ import {
 import { CHECKOUT } from '@/lib/api-constants';
 import { formatCurrency } from '@/lib/utils';
 import { API } from '@/services';
+import { useAppSelector } from '@/stores/hooks';
+import { selectCartItems } from '@/stores/reducers/cartReducer';
 
 const RentalCart = () => {
-  const cars = useSelector((state: any) => state.cart.items);
+  const cars = useAppSelector(selectCartItems);
   const itemCount = cars.length;
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  const cartTotal = () => {
-    return cars.reduce(
-      (total: any, car: { totalAmount: any }) => total + car?.totalAmount,
-      0,
-    );
-  };
-
-  const cartDeposits = () => {
-    return cars.reduce(
-      (total: any, car: { deposits: any }) => total + car?.deposits,
-      0,
-    );
-  };
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const cartTotal = () => cars.reduce((total, car) => total + car.totalAmount, 0);
+  const cartDeposits = () => cars.reduce((total, car) => total + car.deposits, 0);
 
   const handlePayment = async () => {
     setIsLoading(true);
     try {
-      const stripePK: string | undefined =
-        process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
-
-      if (!stripePK) {
-        toast.error('Stripe public key is not set');
-        return;
-      }
-
-      const stripe: any = await loadStripe(stripePK);
-
-      const response: any = await API.post(CHECKOUT, cars);
-
-      localStorage.setItem('checkout_session_id', response?.data?.id);
-
-      const result = await stripe.redirectToCheckout({
-        sessionId: response?.data?.id,
+      // Server tự tính tiền và tạo đơn chờ thanh toán; client chỉ gửi xe + ngày thuê
+      const { data } = await API.post(CHECKOUT, {
+        items: cars.map(({ carId, startDate, endDate }) => ({
+          carId,
+          startDate,
+          endDate,
+        })),
       });
 
-      if (result.error) {
-        toast.error(result.error.message);
-        return;
-      }
-      setIsLoading(false);
+      if (!data?.url) throw new Error('Không tạo được phiên thanh toán');
+
+      // Chuyển thẳng tới trang thanh toán của Stripe (không cần tải Stripe.js)
+      window.location.assign(data.url);
     } catch (error: any) {
-      toast.error(error.message);
-      setIsLoading(false);
-    } finally {
+      const message = Array.isArray(error?.message)
+        ? error.message.join(', ')
+        : error?.message;
+      toast.error(message || 'Thanh toán thất bại, vui lòng thử lại');
       setIsLoading(false);
     }
   };
@@ -87,14 +62,16 @@ const RentalCart = () => {
     <>
       {isLoading && <LoadingScreen title="Đang thanh toán" />}
       <Sheet>
-        <SheetTrigger className="tex-white group -m-2 flex items-center rounded p-2">
-          <ShoppingCart
-            aria-hidden="true"
-            className="h-6 w-6 flex-shrink-0 text-white group-hover:scale-105"
-          />
-          <span className="ml-1 text-sm font-medium text-white group-hover:scale-105">
-            {isMounted ? itemCount : 0}
-          </span>
+        <SheetTrigger
+          aria-label={itemCount > 0 ? `Giỏ hàng, ${itemCount} xe` : 'Giỏ hàng trống'}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+        >
+          <ShoppingCart aria-hidden="true" className="h-5 w-5" />
+          {itemCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-[11px] font-bold text-white ring-2 ring-primary">
+              {itemCount}
+            </span>
+          )}
         </SheetTrigger>
         <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
           <SheetHeader className="space-y-2.5 pr-6">
@@ -104,8 +81,8 @@ const RentalCart = () => {
             <>
               <div className="flex w-full flex-col pr-6">
                 <ScrollArea className="h-[450px]">
-                  {cars.map((car: any, index: number) => (
-                    <RentalCartItem car={car} key={index} />
+                  {cars.map((car) => (
+                    <RentalCartItem car={car} key={car.carId} />
                   ))}
                 </ScrollArea>
               </div>

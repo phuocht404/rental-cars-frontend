@@ -2,11 +2,14 @@
 
 import { ChevronLeftIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react';
 
 import { CreateCarForm } from '@/components/forms/create-car-form';
 import { Button } from '@/components/ui/button';
 
-export default function AddCarPage({ params }: { params: { slug: string } }) {
+// Next 16: params là Promise, phải unwrap bằng use() trong client component
+export default function AddCarPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const router = useRouter();
 
   return (
@@ -25,7 +28,7 @@ export default function AddCarPage({ params }: { params: { slug: string } }) {
 
       <div className="flex items-center justify-center">
         <div className="w-4/5">
-          <CreateCarForm slug={params?.slug} />
+          <CreateCarForm slug={slug} />
         </div>
       </div>
     </div>

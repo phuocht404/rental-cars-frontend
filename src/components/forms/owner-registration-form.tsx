@@ -1,9 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, ChevronsUpDown, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -20,40 +18,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { OwnerRegistrationSchema } from '@/schemas';
 import { API } from '@/services';
-import { GET_BRANDS_AND_MODELS, UPDATE_ROLE_OWNER } from '@/lib/api-constants';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '../ui/command';
-import { ScrollArea } from '../ui/scroll-area';
-import axios from 'axios';
+import { UPDATE_ROLE_OWNER } from '@/lib/api-constants';
+
+
+
+
 
 const OwnerRegistrationForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [brands, setBrands] = useState<any[]>([]);
 
   const form = useForm<z.infer<typeof OwnerRegistrationSchema>>({
     resolver: zodResolver(OwnerRegistrationSchema),
   });
-
-  const getBrandAndModel = async () => {
-    try {
-      const { data } = await API.get(GET_BRANDS_AND_MODELS);
-
-      setBrands(data);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
 
   async function onSubmit(values: z.infer<typeof OwnerRegistrationSchema>) {
     setIsLoading(true);
@@ -71,9 +47,6 @@ const OwnerRegistrationForm = () => {
     }
   }
 
-  useEffect(() => {
-    getBrandAndModel();
-  }, []);
 
   return (
     <Form {...form}>

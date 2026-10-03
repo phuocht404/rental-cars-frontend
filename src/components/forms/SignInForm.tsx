@@ -3,10 +3,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -20,15 +19,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { CookiesStorage } from '@/config/cookie';
 import { AUTH_SIGNIN } from '@/lib/api-constants';
+import { setSession } from '@/lib/auth-client';
 import { signInSchema } from '@/schemas';
-import { setTokens, setUser } from '@/stores/reducers/authReducer';
 
 import { API } from '../../services';
 
 export function SignInFrom() {
-  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -42,31 +40,27 @@ export function SignInFrom() {
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
     setIsLoading(true);
     try {
+      // Token được server set vào cookie httpOnly; client chỉ giữ thông tin hiển thị
       const { data } = await API.post(AUTH_SIGNIN, values);
 
-      dispatch(setUser(data?.user));
-      dispatch(setTokens(data?.tokens.accessToken));
+      setSession(data.user);
+      toast.success('Đăng nhập thành công!!!');
 
-      localStorage.setItem('user', JSON.stringify(data?.user));
+      // Chỉ cho phép quay lại đường dẫn nội bộ để tránh open redirect
+      const callbackUrl = searchParams.get('callbackUrl');
+      const safeCallback =
+        callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//')
+          ? callbackUrl
+          : null;
 
-      // set token to cookie storage
-      CookiesStorage.setCookieData('accessToken', data?.tokens.accessToken);
-      CookiesStorage.setCookieData('role', data?.user?.role);
-
-      if (data?.user.role === 'TRAVELER' || data?.user.role === 'CAROWNER') {
-        router.push('/');
-        toast.success('Đăng nhập thành công!!!');
-      } else if (data?.user.role === 'ADMIN') {
-        router.push('/admin/dashboard');
-        toast.success('Đăng nhập thành công!!!');
-      } else {
-        toast.error('Có lỗi đã xảy ra!!');
-      }
-      setIsLoading(false);
+      router.replace(
+        data.user.role === 'ADMIN' ? '/admin/dashboard' : safeCallback || '/',
+      );
+      router.refresh();
     } catch (error: any) {
       if (error?.statusCode === 401) {
-        toast.error(error?.error, {
-          description: 'Tài khoản hoặc mật khẩu không chính xác!!!',
+        toast.error('Đăng nhập thất bại', {
+          description: error?.message || 'Tài khoản hoặc mật khẩu không chính xác!!!',
         });
       } else {
         toast.error('Đăng nhập thất bại!!!');
@@ -110,19 +104,23 @@ export function SignInFrom() {
                     className="pr-9"
                   />
                   {showPassword ? (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <Eye size={18} />
-                    </a>
+                    </button>
                   ) : (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <EyeOff size={18} />
-                    </a>
+                    </button>
                   )}
                 </div>
               </FormControl>
@@ -134,8 +132,13 @@ export function SignInFrom() {
           )}
         />
 
-        <div className="w-full text-right text-xs hover:underline">
-          <Link href="#">Quên mật khẩu?</Link>
+        <div className="w-full pb-2 pt-1 text-right text-sm">
+          <Link
+            href="#"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Quên mật khẩu?
+          </Link>
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>

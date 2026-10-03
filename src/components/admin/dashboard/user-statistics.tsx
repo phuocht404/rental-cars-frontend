@@ -1,8 +1,7 @@
 'use client';
 
 import { GET_USER_TYPE_ANALYTICS } from '@/lib/api-constants';
-import { API } from '@/services';
-import { useEffect, useState } from 'react';
+import { queryKeys, useApiQuery } from '@/lib/query';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 
 const RADIAN = Math.PI / 180;
@@ -13,7 +12,6 @@ const renderCustomizedLabel = ({
   innerRadius,
   outerRadius,
   percent,
-  index,
 }: {
   cx: number;
   cy: number;
@@ -21,7 +19,6 @@ const renderCustomizedLabel = ({
   innerRadius: number;
   outerRadius: number;
   percent: number;
-  index: number;
 }) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -41,19 +38,7 @@ const renderCustomizedLabel = ({
 };
 
 const UserStatistics = () => {
-  const [data, setData] = useState<any>([]);
-
-  const getUserTypeAnalytics = async () => {
-    const res = await API.get(GET_USER_TYPE_ANALYTICS);
-
-    if (res.status === 200) {
-      setData(res.data);
-    }
-  };
-
-  useEffect(() => {
-    getUserTypeAnalytics();
-  }, []);
+  const { data = [] } = useApiQuery<any[]>([...queryKeys.adminAnalytics, 'user-type'], GET_USER_TYPE_ANALYTICS);
 
   return (
     <>

@@ -8,13 +8,11 @@ import {
   ShoppingCart,
   Users,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
+import React, { useState } from 'react';
 
-import RevenueStatistics from '@/components/admin/dashboard/revenue-statistics';
 import CardAnalytic from '@/components/admin/cards/card-analytic';
 import { columns } from '@/components/admin/cars/columns';
-import UserStatistics from '@/components/admin/dashboard/user-statistics';
 import { DataTable } from '@/components/admin/tables/data-table';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -26,49 +24,31 @@ import {
 } from '@/components/ui/popover';
 import { GET_ALL_CAR_IS_RENTING, GET_ANALYTICS } from '@/lib/api-constants';
 import { cn, formatCurrency } from '@/lib/utils';
-import { API } from '@/services';
+import { Skeleton } from '@/components/ui/skeleton';
+import { queryKeys, useApiQuery } from '@/lib/query';
+
+// recharts khá nặng: tách thành chunk riêng, chỉ tải trên trang dashboard
+const ChartSkeleton = () => <Skeleton className="h-[300px] w-full" />;
+const RevenueStatistics = dynamic(
+  () => import('@/components/admin/dashboard/revenue-statistics'),
+  { ssr: false, loading: ChartSkeleton },
+);
+const UserStatistics = dynamic(
+  () => import('@/components/admin/dashboard/user-statistics'),
+  { ssr: false, loading: ChartSkeleton },
+);
 
 const DashboardPage = () => {
-  const [analytics, setAnalytics] = useState<any>();
-  const [carIsRenting, setCarIsRenting] = useState<any>();
   const [fromDay, setFromDay] = useState<Date | undefined>(
     new Date(new Date().getFullYear(), 0, 1),
   );
   const [toDay, setToDay] = useState<Date | undefined>(new Date());
+  // Mốc "hôm nay" cố định cho cả vòng đời trang, không gọi Date.now() mỗi lần render
+  const [today] = useState(() => new Date());
 
-  const getUserAnalytics = async () => {
-    try {
-      const res = await API.get(GET_ANALYTICS);
-
-      if (res.status === 200) {
-        setAnalytics(res.data);
-      }
-    } catch (e: any) {
-      toast.error(e.error, {
-        description: e.message,
-      });
-    }
-  };
-
-  const getAllCarIsRenting = async () => {
-    try {
-      const res = await API.get(GET_ALL_CAR_IS_RENTING);
-
-      if (res.status === 200) {
-        setCarIsRenting(res.data);
-        return;
-      }
-    } catch (e: any) {
-      toast.error(e.error, {
-        description: e.message,
-      });
-    }
-  };
-
-  useEffect(() => {
-    getUserAnalytics();
-    getAllCarIsRenting();
-  }, []);
+  // Hai truy vấn chạy song song, cache lại nên quay lại dashboard sẽ hiện ngay
+  const { data: analytics } = useApiQuery<any>([...queryKeys.adminAnalytics, 'cards'], GET_ANALYTICS);
+  const { data: carIsRenting } = useApiQuery<any[]>([...queryKeys.adminAnalytics, 'renting'], GET_ALL_CAR_IS_RENTING);
 
   return (
     <div className="w-full bg-white dark:bg-black">
@@ -133,7 +113,7 @@ const DashboardPage = () => {
                     selected={fromDay}
                     onSelect={setFromDay}
                     numberOfMonths={1}
-                    toDate={new Date(Date.now())}
+                    toDate={today}
                   />
                 </PopoverContent>
               </Popover>
@@ -164,7 +144,7 @@ const DashboardPage = () => {
                     selected={toDay}
                     onSelect={setToDay}
                     numberOfMonths={1}
-                    toDate={new Date(Date.now())}
+                    toDate={today}
                   />
                 </PopoverContent>
               </Popover>

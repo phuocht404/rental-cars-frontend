@@ -1,72 +1,136 @@
 import Image from 'next/image';
 import React from 'react';
 
-const advantageList: { image: string; title: string; content: string }[] = [
+import { cn } from '@/lib/utils';
+
+import Reveal from '../reveal';
+import SectionHeading from './SectionHeading';
+
+type Tone = 'solid' | 'tint' | 'plain';
+
+const advantageList: {
+  image: string;
+  title: string;
+  content: string;
+  wide: boolean;
+  tone: Tone;
+}[] = [
   {
     image: '/images/an-tam-dat-xe.svg',
     title: 'An tâm đặt xe',
     content:
-      'Không tính phí huỷ chuyến trong vòng 1h sau khi đặt cọc. Hoàn cọc và bồi thường 100% nếu chủ xe huỷ chuyến trong vòng 7 ngày trước chuyến đi.',
+      'Chỉ trả trước 30% tiền cọc. Chủ xe từ chối hoặc không xác nhận trước ngày nhận xe, bạn được hoàn lại tiền cọc.',
+    wide: true,
+    tone: 'solid',
   },
   {
     image: '/images/thu-tuc-don-gian.svg',
     title: 'Thủ tục đơn giản',
     content:
-      'Chỉ cần có CCCD gắn chip (Hoặc Passport) & Giấy phép lái xe là bạn đã đủ điều kiện thuê xe trên Mioto.',
+      'Chỉ cần CCCD gắn chip (hoặc hộ chiếu) và giấy phép lái xe là đủ điều kiện thuê xe.',
+    wide: false,
+    tone: 'plain',
   },
   {
     image: '/images/thanh-toan-de-dang.svg',
     title: 'Thanh toán dễ dàng',
     content:
-      'Đa dạng hình thức thanh toán: ATM, thẻ Visa & Ví điện tử (Momo, VnPay, ZaloPay).',
+      'Đặt cọc trực tuyến bằng thẻ Visa, Mastercard qua Stripe. Phần còn lại thanh toán khi nhận xe.',
+    wide: false,
+    tone: 'plain',
   },
   {
     image: '/images/giao-xe-tan-noi.svg',
-    title: 'Giao xe tận nơi',
+    title: 'Lịch xe minh bạch',
     content:
-      'Bạn có thể lựa chọn giao xe tận nhà/sân bay... Phí tiết kiệm chỉ từ 15k/km.',
+      'Ngày xe đã có người thuê được khoá ngay trên lịch, bạn không lo đặt trùng hay bị huỷ phút chót.',
+    wide: true,
+    tone: 'tint',
   },
   {
     image: '/images/dong-xe-da-dang.svg',
     title: 'Dòng xe đa dạng',
     content:
-      'Hơn 100 dòng xe cho bạn tuỳ ý lựa chọn: Mini, Sedan, CUV, SUV, MPV, Bán tải.',
+      'Sedan, SUV, MPV 7 chỗ đến xe điện. Lọc nhanh theo số chỗ, nhiên liệu và mức giá.',
+    wide: true,
+    tone: 'plain',
   },
   {
     image: '/images/lai-xe-an-toan.svg',
-    title: 'Lái xe an toàn',
-    content: 'Vững tay lái với gói bảo hiểm thuê xe từ nhà bảo hiểm MIC & VNI.',
+    title: 'Đánh giá thật',
+    content: 'Chỉ khách đã hoàn thành chuyến đi mới được đánh giá, giúp bạn chọn đúng xe và đúng chủ xe.',
+    wide: false,
+    tone: 'tint',
   },
 ];
 
+const toneClass: Record<Tone, string> = {
+  solid: 'border-transparent bg-primary text-primary-foreground',
+  tint: 'border-primary/15 bg-primary/5',
+  plain: 'border-border bg-card',
+};
+
 const Advantage = () => {
   return (
-    <section className="mt-20 w-full rounded-lg bg-white py-6 dark:bg-black dark:text-white">
-      <div className="">
-        <div className="flex flex-col items-center justify-center gap-6">
-          <h2 className="text-4xl font-bold text-black dark:text-white">
-            Ưu Điểm của <span className="text-primary">Rental Cars</span>
-          </h2>
-          <p className="text-lg text-black dark:text-white">
-            Những tính năng giúp bạn dễ dàng hơn khi thuê xe trên Rental Cars.
-          </p>
-        </div>
-      </div>
+    <section className="mt-24 w-full">
+      <SectionHeading
+        title={
+          <>
+            Ưu điểm của <span className="text-primary">Rental Cars</span>
+          </>
+        }
+        description="Những tính năng giúp bạn dễ dàng hơn khi thuê xe trên Rental Cars."
+        className="mb-8"
+      />
 
-      <div className="mt-6 grid w-full grid-cols-3 grid-rows-2 gap-4 lg:grid-cols-2 lg:grid-rows-3">
-        {advantageList.map(({ image, title, content }, index) => (
-          <div
-            key={index}
-            className="flex max-w-[326px] flex-col items-center justify-start text-center"
+      {/* Bento: 6 nội dung, 6 ô (2+1, 1+2, 2+1 trên desktop; 1 cột trên mobile) */}
+      <div className="grid grid-cols-3 gap-4 lg:grid-cols-1">
+        {advantageList.map(({ image, title, content, wide, tone }, index) => (
+          <Reveal
+            key={title}
+            delay={(index % 3) * 100}
+            className={cn(wide ? 'col-span-2 lg:col-span-1' : 'col-span-1')}
           >
-            <Image src={image} alt={title} width={240} height={240} />
-            <h3 className="px-6 text-xl font-bold text-black dark:text-white">
-              {title}
-            </h3>
-            <p className="px-6 text-base text-black dark:text-white">
-              {content}
-            </p>
-          </div>
+            <div
+              className={cn(
+                'flex h-full items-center gap-6 rounded-2xl border p-6 transition-transform duration-300 hover:-translate-y-1',
+                !wide && 'flex-col items-start justify-between',
+                // Mobile: hàng ngang gọn (minh hoạ nhỏ bên trái) thay vì ô cao với minh hoạ lớn
+                'sm:flex-row-reverse sm:items-center sm:justify-end sm:gap-4 sm:p-4',
+                toneClass[tone],
+              )}
+            >
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xl font-bold sm:text-base">{title}</h3>
+                <p
+                  className={cn(
+                    'text-base leading-relaxed sm:text-sm',
+                    tone === 'solid'
+                      ? 'text-primary-foreground/90'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  {content}
+                </p>
+              </div>
+
+              <div
+                className={cn(
+                  'shrink-0 rounded-xl p-2 sm:self-center sm:p-1',
+                  tone === 'solid' && 'bg-white',
+                  wide ? 'self-center' : 'self-end',
+                )}
+              >
+                <Image
+                  src={image}
+                  alt=""
+                  width={wide ? 160 : 120}
+                  height={wide ? 160 : 120}
+                  className="sm:h-14 sm:w-14"
+                />
+              </div>
+            </div>
+          </Reveal>
         ))}
       </div>
     </section>

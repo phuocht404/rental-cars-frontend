@@ -1,86 +1,72 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { toast } from 'sonner';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface Car {
+import type { RootState } from '@/stores/store';
+
+export interface CartItem {
   carId: number;
   carName: string;
   pricePerDay: number;
   images: string;
+  // DD/MM/YYYY
   startDate: string;
   endDate: string;
+  // Chỉ để hiển thị ước tính; server luôn tính lại khi thanh toán
   deposits: number;
   totalAmount: number;
 }
 
-interface CartItem {
-  car: Car;
-}
-
 interface CartState {
-  items: CartItem[] | [];
-  addItem: (car: any) => void;
-  removeItem: (carId: string) => void;
-  clearCart: () => void;
+  items: CartItem[];
+  hydrated: boolean;
 }
 
-const loadCartState = () => {
+const STORAGE_KEY = 'cart-storage';
+
+export const loadCartItems = (): CartItem[] => {
   try {
-    if (typeof window !== 'undefined') {
-      const serializedState = localStorage.getItem('cart-storage');
-      return serializedState ? JSON.parse(serializedState) : undefined;
-    }
-  } catch (error) {
-    toast.error('Error loading cart state from localStorage');
-    return undefined;
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    return Array.isArray(parsed?.items) ? parsed.items : [];
+  } catch {
+    return [];
   }
 };
 
-const saveCartState = (state: CartState) => {
+export const saveCartItems = (items: CartItem[]) => {
   try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem('cart-storage', serializedState);
-  } catch (error) {
-    toast.error('Error saving cart state to localStorage');
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ items }));
+  } catch {
+    // bỏ qua khi localStorage không dùng được
   }
 };
 
-const initialState: CartState = loadCartState() || {
-  items: [],
-};
+const initialState: CartState = { items: [], hydrated: false };
 
 const cartReducer = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addItem(state, action) {
-      state.items = loadCartState().items;
-      const exitsCar = state.items.find(
-        (item: any) => item?.carId === action.payload?.carId,
-      );
-      if (exitsCar) {
-        toast.error('Xe đã tồn tại trong giỏ hàng');
-        return;
-      } else {
-        state.items = [...state.items, action.payload];
-        saveCartState(state);
-        toast.success('Đã thêm xe vào giỏ hàng');
-      }
+    hydrateCart(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload;
+      state.hydrated = true;
     },
-    removeItem(state, action) {
-      state.items = loadCartState().items;
-      state.items = state.items.filter(
-        (item: any) => item?.carId !== action.payload,
-      );
-      saveCartState(state);
-      toast.success('Đã xóa xe khỏi giỏ hàng');
+    addItem(state, action: PayloadAction<CartItem>) {
+      if (state.items.some((item) => item.carId === action.payload.carId)) return;
+      state.items.push(action.payload);
     },
-    clearCart: (state) => {
+    removeItem(state, action: PayloadAction<number>) {
+      state.items = state.items.filter((item) => item.carId !== action.payload);
+    },
+    clearCart(state) {
       state.items = [];
-      saveCartState(state);
     },
   },
 });
 
-export { loadCartState, saveCartState };
-export const { addItem, removeItem, clearCart } = cartReducer.actions;
+export const { hydrateCart, addItem, removeItem, clearCart } = cartReducer.actions;
 export default cartReducer.reducer;
+
+export const selectCartItems = (state: RootState) => state.cart.items;
+export const selectIsInCart = (carId: number) => (state: RootState) =>
+  state.cart.items.some((item) => item.carId === carId);

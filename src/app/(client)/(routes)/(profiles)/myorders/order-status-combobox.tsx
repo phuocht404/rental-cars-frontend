@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { orderDetailStatus } from '@/app/(client)/(routes)/(profiles)/myorders/common/data';
@@ -59,9 +59,6 @@ const OrderStatusCombobox = ({
     }
   };
 
-  useEffect(() => {
-    setValue(value);
-  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

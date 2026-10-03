@@ -1,10 +1,15 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+export const metadata: Metadata = {
+  title: 'Hướng dẫn chung',
+  description: 'Các bước thuê xe tự lái trên Rental Cars: tìm xe, đặt cọc, nhận xe và trả xe.',
+  alternates: { canonical: '/howitwork' },
+};
 
 const travelerList: { icon: string; title: string; description: string }[] = [
   {
@@ -62,13 +67,13 @@ const ownerList: { icon: string; title: string; description: string }[] = [
     icon: 'icons/car-tick-icon.svg',
     title: 'Duyệt xe',
     description:
-      'Bạn chỉ cần chờ trong vài phút, hệ thống sẽ kiểm duyệt xe của bạn có đáp ứng đủ hay không yêu cầu cho thuê. Mioto sẽ chủ động liện hệ với bạn trong trường hợp có vấn đề phát sinh.',
+      'Bạn chỉ cần chờ trong vài phút, hệ thống sẽ kiểm duyệt xe của bạn có đáp ứng đủ hay không yêu cầu cho thuê. Rental Cars sẽ chủ động liện hệ với bạn trong trường hợp có vấn đề phát sinh.',
   },
   {
     icon: 'icons/bell-icon.svg',
     title: 'Nhận và phản hồi',
     description:
-      'Khi có khách gửi yêu cầu thuê xe, bạn sẽ nhận được thông báo từ Mioto. Kiểm tra thông tin cá nhân của khách và xác nhận cho thuê sớm nhất có thể. Khi có sự đồng ý cho thuê từ bạn, khách thuê sẽ chuyển tiền đặt cọc để hoàn tất việc đặt xe.',
+      'Khi có khách gửi yêu cầu thuê xe, bạn sẽ nhận được thông báo từ Rental Cars. Kiểm tra thông tin cá nhân của khách và xác nhận cho thuê sớm nhất có thể. Khi có sự đồng ý cho thuê từ bạn, khách thuê sẽ chuyển tiền đặt cọc để hoàn tất việc đặt xe.',
   },
   {
     icon: 'icons/key-icon.svg',
@@ -80,7 +85,7 @@ const ownerList: { icon: string; title: string; description: string }[] = [
     icon: 'icons/tick-outline-icon.svg',
     title: 'Hoàn thành đặt xe',
     description:
-      'Sau khi hết thời gian khách thuê, gặp khách thuê, kiểm tra xe, kí biên bản bàn giao và nhận lại xe của bạn như thỏa thuận ban đầu. Đừng quên cho điểm rating khách thuê và gợi ý họ cho điểm bạn trên ứng dụng Mioto. Điều này sẽ tăng uy tín của bạn trong cộng đồng thuê xe tự lái Mioto.',
+      'Sau khi hết thời gian khách thuê, gặp khách thuê, kiểm tra xe, kí biên bản bàn giao và nhận lại xe của bạn như thỏa thuận ban đầu. Đừng quên cho điểm rating khách thuê và gợi ý họ cho điểm bạn trên ứng dụng Rental Cars. Điều này sẽ tăng uy tín của bạn trong cộng đồng thuê xe tự lái Rental Cars.',
   },
 ];
 
@@ -108,9 +113,9 @@ const HowItWorkPage = () => {
                     <div className="absolute right-0 top-0 rounded-xl bg-primary p-4 font-semibold text-white">
                       {index + 1}.
                     </div>
-                    <Image src={icon} alt={icon} width={60} height={60} />
+                    <Image src={icon} alt="" width={60} height={60} />
                     <h5 className="my-3 text-xl font-semibold">{title}</h5>
-                    <p className="text-justify text-base text-gray-500">
+                    <p className="text-base leading-relaxed text-muted-foreground">
                       {description}
                     </p>
                   </div>
@@ -135,9 +140,9 @@ const HowItWorkPage = () => {
                     <div className="absolute right-0 top-0 rounded-xl bg-primary p-4 font-semibold text-white">
                       {index + 1}.
                     </div>
-                    <Image src={icon} alt={icon} width={60} height={60} />
+                    <Image src={icon} alt="" width={60} height={60} />
                     <h5 className="my-3 text-xl font-semibold">{title}</h5>
-                    <p className="text-justify text-base text-gray-500">
+                    <p className="text-base leading-relaxed text-muted-foreground">
                       {description}
                     </p>
                   </div>

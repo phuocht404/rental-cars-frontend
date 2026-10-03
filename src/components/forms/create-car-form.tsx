@@ -32,12 +32,15 @@ import {
   GET_ALL_FEATURES,
   GET_BRANDS_AND_MODELS,
   GET_CAR_BY_ID,
-  UPDATE_USER,
+  UPDATE_CAR,
 } from '@/lib/api-constants';
+import { uploadImageToCloudinary } from '@/lib/cloudinary-upload';
 import { cn } from '@/lib/utils';
 import { createCarSchema } from '@/schemas';
+import { queryKeys, useApiQuery } from '@/lib/query';
 import { API } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   AirVent,
@@ -73,103 +76,121 @@ export const featureOptions = [
   {
     key: 'AIR_CONDITIONING',
     value: 'Điều hòa',
-    icon: <AirVent className="size-8 text-gray-800" />,
+    icon: <AirVent className="size-8 text-foreground" />,
   },
   {
     key: 'RADIO',
     value: 'Radio',
-    icon: <BoomBox className="size-8 text-gray-800" />,
+    icon: <BoomBox className="size-8 text-foreground" />,
   },
-  { key: 'USB', value: 'USB', icon: <Usb className="size-8 text-gray-800" /> },
+  { key: 'USB', value: 'USB', icon: <Usb className="size-8 text-foreground" /> },
   {
     key: 'BLUETOOTH',
     value: 'Bluetooth',
-    icon: <Bluetooth className="size-8 text-gray-800" />,
+    icon: <Bluetooth className="size-8 text-foreground" />,
   },
   {
     key: 'GPS',
     value: 'GPS',
-    icon: <LocateFixed className="size-8 text-gray-800" />,
+    icon: <LocateFixed className="size-8 text-foreground" />,
   },
   {
     key: 'PARKING_SENSOR',
     value: 'Cảm biến lùi',
-    icon: <GalleryVerticalEnd className="size-8 rotate-180 text-gray-800" />,
+    icon: <GalleryVerticalEnd className="size-8 rotate-180 text-foreground" />,
   },
   {
     key: 'CAMERA',
     value: 'Camera',
-    icon: <Video className="size-8 text-gray-800" />,
+    icon: <Video className="size-8 text-foreground" />,
   },
   {
     key: 'SUNROOF',
     value: 'Cửa sổ trời',
-    icon: <CloudSun className="size-8 text-gray-800" />,
+    icon: <CloudSun className="size-8 text-foreground" />,
   },
   {
     key: 'KEYLESS',
     value: 'Khóa không cần chìa',
-    icon: <Key className="size-8 text-gray-800" />,
+    icon: <Key className="size-8 text-foreground" />,
   },
   {
     key: 'AIRBAG',
     value: 'Túi khí',
-    icon: <Shell className="size-8 text-gray-800" />,
+    icon: <Shell className="size-8 text-foreground" />,
   },
   {
     key: 'AUTO_BRAKE',
     value: 'Phanh tự động',
-    icon: <ShieldMinus className="size-8 text-gray-800" />,
+    icon: <ShieldMinus className="size-8 text-foreground" />,
   },
   {
     key: 'ALARM',
     value: 'Chống trộm',
-    icon: <ShieldCheck className="size-8 text-gray-800" />,
+    icon: <ShieldCheck className="size-8 text-foreground" />,
   },
   {
     key: 'AUTO_WIPER',
     value: 'Gạc mưa tự động',
-    icon: <Gauge className="size-8 text-gray-800" />,
+    icon: <Gauge className="size-8 text-foreground" />,
   },
   {
     key: 'LANE_KEEPING',
     value: 'Giữ làn đường',
-    icon: <GanttChart className="size-8 text-gray-800" />,
+    icon: <GanttChart className="size-8 text-foreground" />,
   },
   {
     key: 'BLIND_SPOT',
     value: 'Cảnh báo điểm mù',
-    icon: <View className="size-8 text-gray-800" />,
+    icon: <View className="size-8 text-foreground" />,
   },
   {
     key: 'REAR_TRAFFIC',
     value: 'Cảnh báo xe phía sau',
-    icon: <CarTaxiFront className="size-8 text-gray-800" />,
+    icon: <CarTaxiFront className="size-8 text-foreground" />,
   },
   {
     key: 'TIRE_PRESSURE',
     value: 'Cảnh báo áp suất lốp',
-    icon: <LifeBuoy className="size-8 text-gray-800" />,
+    icon: <LifeBuoy className="size-8 text-foreground" />,
   },
   {
     key: 'KID_SEAT',
     value: 'ghế trẻ em',
-    icon: <Baby className="size-8 text-gray-800" />,
+    icon: <Baby className="size-8 text-foreground" />,
   },
   {
     key: 'MAP',
     value: 'Bản đồ',
-    icon: <Map className="size-8 text-gray-800" />,
+    icon: <Map className="size-8 text-foreground" />,
   },
 ];
 
 export function CreateCarForm({ slug }: { slug: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<any[]>([]);
-  const [carImages, setCarImages] = useState<any[]>([]);
-  const [brandData, setBrandData] = useState<any>([]);
-  const [features, setFeatures] = useState<any>([]);
-  const [province, setProvince] = useState<any>({});
+  // Ảnh xem trước khi chọn file mới; chưa chọn thì hiển thị ảnh hiện có của xe
+  const [previewImages, setPreviewImages] = useState<string[] | null>(null);
+  // Danh mục hãng/mẫu xe và tính năng ít thay đổi: cache dùng chung giữa các form
+  const { data: brandData = [] } = useApiQuery<any[]>(queryKeys.brandsWithModels, GET_BRANDS_AND_MODELS, undefined, {
+    staleTime: 10 * 60 * 1000,
+  });
+  const { data: featuresPage } = useApiQuery<any>(queryKeys.features, GET_ALL_FEATURES, { limit: 100 }, {
+    staleTime: 10 * 60 * 1000,
+  });
+  const features = featuresPage?.data ?? [];
+  const queryClient = useQueryClient();
+  // Danh sách phường/xã Đà Nẵng (mã 48) gần như không đổi: cache lâu
+  const { data: province = {} } = useQuery<any>({
+    queryKey: ['provinces', 48],
+    queryFn: () => axios.get('https://provinces.open-api.vn/api/p/48?depth=3').then((res) => res.data),
+    staleTime: Infinity,
+  });
+  const isNew = slug === 'new';
+  const { data: car } = useApiQuery<any>(queryKeys.car(slug), `${GET_CAR_BY_ID}/${Number(slug)}`, undefined, {
+    enabled: !isNew,
+  });
+  const carImages: string[] = previewImages ?? car?.CarImage ?? [];
 
   const router = useRouter();
 
@@ -177,112 +198,9 @@ export function CreateCarForm({ slug }: { slug: string }) {
     resolver: zodResolver(createCarSchema),
   });
 
-  const getProvince = async () => {
-    try {
-      const { data } = await axios.get(
-        'https://provinces.open-api.vn/api/p/48?depth=3',
-      );
-
-      setProvince(data);
-      form.setValue('province_name', data.name);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const uploadImagesToCloud = async (files: any) => {
-    try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-      const imagesArr: any[] = [];
-
-      const uploadPromises = files.map(async (file: any) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('cloud_name', cloudName as string);
-        formData.append('upload_preset', uploadPreset as string);
-        formData.append('folder', 'rental-cars-cloudinary/cars');
-
-        try {
-          const response = await axios.post(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            formData,
-          );
-
-          if (response.status === 200) {
-            imagesArr.push(response.data.url);
-          } else {
-            toast.error('Upload ảnh thất bại');
-            throw new Error('Upload ảnh thất bại');
-          }
-
-          return response.data.public_id;
-        } catch (error: any) {
-          toast.error(error.message);
-          throw error;
-        }
-      });
-
-      // const results = await Promise.all(uploadPromises);
-      // const publicIds = results.map((result) => result.public_id);
-      // const urls = results.map((result) => result.url);
-
-      return imagesArr;
-    } catch (error: any) {
-      toast.error(error.message);
-      throw error;
-    }
-  };
-
-  const getAllBrand = async () => {
-    try {
-      const res = await API.get(GET_BRANDS_AND_MODELS);
-      if (res.status === 200) {
-        setBrandData(res.data);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const getFeatures = async () => {
-    try {
-      const res = await API.get(GET_ALL_FEATURES);
-      if (res.status === 200) {
-        setFeatures(res.data.data);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const getCarById = async (id: string) => {
-    try {
-      const res = await API.get(GET_CAR_BY_ID + `/${Number(id)}`);
-
-      if (res.status === 200) {
-        const data = {
-          images: [],
-          licensePlates: res.data.licensePlates,
-          brandId: res.data.brandId,
-          modelId: res.data.modelId,
-          seats: res.data.seats,
-          yearOfManufacture: res.data.yearOfManufacture,
-          transmission: res.data.transmission,
-          fuel: res.data.fuel,
-          description: res.data.description,
-          features: res.data.CarFeature,
-          pricePerDay: res.data.pricePerDay,
-        };
-
-        form.reset(data);
-        setCarImages(res.data.CarImage);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  // Upload song song thẳng lên Cloudinary và chờ tất cả xong
+  const uploadImagesToCloud = (files: File[]) =>
+    Promise.all(files.map((file) => uploadImageToCloudinary(file, 'rental-cars-cloudinary/cars')));
 
   const handleUploadImage = (e: any) => {
     const files = e.target.files;
@@ -301,7 +219,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
         return;
       } else {
         imageArr.push(URL.createObjectURL(file));
-        setCarImages(imageArr);
+        setPreviewImages([...imageArr]);
         form.setValue('images', imageArr);
       }
     });
@@ -314,71 +232,90 @@ export function CreateCarForm({ slug }: { slug: string }) {
   async function onSubmit(values: z.infer<typeof createCarSchema>) {
     setIsLoading(true);
     try {
-      const imgArr = await uploadImagesToCloud(selectedImage);
-      const address = `${values.ward_name}, ${values.district_name}, ${values.province_name}`;
+      const isNew = slug === 'new';
 
-      if (slug === 'new') {
-        values.images = imgArr;
-
-        const res = await API.post(CREATE_CAR, {
-          ...values,
-          address,
-          pricePerDay: Number(values.pricePerDay),
-        });
-
-        if (res.status === 201) {
-          toast.success('Thêm xe thành công!');
-          setIsLoading(false);
-          router.push('/mycars');
-        } else {
-          toast.error('Thêm xe thất bại!');
-          setIsLoading(false);
-        }
-      } else {
-        const res = await API.put(UPDATE_USER, values);
-
-        if (res.status === 200) {
-          toast.success('Cập nhật xe thành công!');
-          setIsLoading(false);
-          router.push('/mycars');
-        } else {
-          toast.error('Cập nhật xe thất bại!');
-          setIsLoading(false);
-        }
+      if (isNew && selectedImage.length < 4) {
+        toast.error('Vui lòng chọn tối thiểu 4 ảnh');
+        return;
       }
 
-      setIsLoading(false);
+      // Khi sửa xe mà không chọn ảnh mới thì giữ nguyên ảnh cũ
+      const images = selectedImage.length > 0 ? await uploadImagesToCloud(selectedImage) : undefined;
+      const address =
+        values.ward_name && values.district_name && values.province_name
+          ? `${values.ward_name}, ${values.district_name}, ${values.province_name}`
+          : undefined;
+
+      const payload = {
+        licensePlates: values.licensePlates,
+        modelId: values.modelId,
+        seats: values.seats,
+        yearOfManufacture: values.yearOfManufacture,
+        transmission: values.transmission,
+        fuel: values.fuel,
+        description: values.description,
+        features: values.features,
+        pricePerDay: Number(values.pricePerDay),
+        address,
+        images,
+      };
+
+      if (isNew) {
+        await API.post(CREATE_CAR, payload);
+        toast.success('Thêm xe thành công! Xe sẽ hiển thị sau khi được duyệt.');
+      } else {
+        await API.patch(`${UPDATE_CAR}/${Number(slug)}`, payload);
+        toast.success('Cập nhật xe thành công! Xe sẽ được duyệt lại.');
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.myCars });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminCars });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminCarRegistrations });
+      router.push('/mycars');
     } catch (error: any) {
-      setIsLoading(false);
-      toast.error(error?.message);
+      const message = Array.isArray(error?.message) ? error.message.join(', ') : error?.message;
+      toast.error(message || 'Lưu xe thất bại');
     } finally {
       setIsLoading(false);
     }
   }
 
+  // Nạp dữ liệu vào form khi tải xong (form.reset của react-hook-form, không phải setState của React)
   useEffect(() => {
-    getAllBrand();
-    getFeatures();
-    getProvince();
-
-    if (slug === 'new') {
+    if (isNew) {
       form.reset({
         images: [],
         licensePlates: '',
         brandId: 0,
         modelId: 0,
         seats: 4,
-        yearOfManufacture: 2023,
+        yearOfManufacture: new Date().getFullYear(),
         transmission: 'AUTOMATIC_TRANSMISSION',
         fuel: 'GASOLINE',
         description: '',
         features: [],
         pricePerDay: 1000,
       });
-    } else {
-      getCarById(slug);
+    } else if (car) {
+      form.reset({
+        images: [],
+        licensePlates: car.licensePlates,
+        brandId: car.brandId,
+        modelId: car.modelId,
+        seats: car.seats,
+        yearOfManufacture: car.yearOfManufacture,
+        transmission: car.transmission,
+        fuel: car.fuel,
+        description: car.description,
+        features: car.CarFeature,
+        pricePerDay: car.pricePerDay,
+      });
     }
-  }, [slug]);
+  }, [isNew, car, form]);
+
+  useEffect(() => {
+    if (province?.name) form.setValue('province_name', province.name);
+  }, [province, form]);
 
   return (
     <Form {...form}>
@@ -389,23 +326,23 @@ export function CreateCarForm({ slug }: { slug: string }) {
             name="images"
             render={({ field }) => (
               <FormItem className="flex flex-col items-center justify-center gap-1">
-                <div className="flex min-h-36 w-full items-center justify-center gap-4 border border-gray-200 px-2">
-                  {carImages.length &&
+                <div className="flex min-h-36 w-full flex-wrap items-center justify-center gap-4 rounded-xl border border-dashed border-border p-3">
+                  {carImages.length > 0 &&
                     carImages.map((image: string) => (
                       <div
-                        className="relative size-28 overflow-hidden border border-gray-200 bg-slate-100 object-cover"
+                        className="relative size-28 overflow-hidden rounded-lg border border-border bg-muted"
                         key={image}
                       >
                         <Image
                           src={image}
-                          alt="avatar"
+                          alt="Ảnh xe"
                           fill
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
                     ))}
                 </div>
-                <FormLabel className="block cursor-pointer rounded bg-primary px-8 py-4 text-center text-white active:scale-95">
+                <FormLabel className="block cursor-pointer rounded-lg bg-primary px-8 py-3 text-center text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98]">
                   Chọn ảnh (tối thiểu 4 )
                 </FormLabel>
                 <FormControl>
@@ -429,7 +366,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
 
         <div className="flex flex-col items-start justify-between gap-2">
           <h2 className="text-xl font-bold">Biển số xe</h2>
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             Lưu ý: Biển số sẽ không thể thay đổi sau khi đăng kí.
           </p>
           <FormField
@@ -448,10 +385,10 @@ export function CreateCarForm({ slug }: { slug: string }) {
 
         <div className="mt-3 flex flex-col items-start justify-between gap-2">
           <h2 className="text-xl font-bold">Thông tin cơ bản</h2>
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             Lưu ý: Các thông tin cơ bản sẽ không thể thay đổi sau khi đăng kí.
           </p>
-          <div className="grid w-full grid-cols-2 grid-rows-3 gap-6">
+          <div className="grid w-full grid-cols-2 gap-6 md:grid-cols-1">
             <FormField
               control={form.control}
               name="brandId"
@@ -465,7 +402,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -529,11 +466,12 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
                         >
+                          {/* eslint-disable-next-line react-hooks/incompatible-library -- watch() của react-hook-form chưa hỗ trợ React Compiler */}
                           {form.watch('brandId')
                             ? field.value
                               ? brandData
@@ -607,7 +545,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -667,7 +605,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -730,7 +668,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -792,7 +730,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'w-[300px] justify-between',
+                            'w-full max-w-[300px] justify-between md:max-w-none',
                             !field.value && 'text-muted-foreground',
                           )}
                           disabled={slug !== 'new'}
@@ -874,7 +812,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                       Tính năng
                     </FormLabel>
                   </div>
-                  <div className="grid w-full grid-cols-3 gap-3 lg:grid-cols-2">
+                  <div className="grid w-full grid-cols-3 gap-3 lg:grid-cols-2 sm:grid-cols-1">
                     {features.map((item: any) => (
                       <FormField
                         key={item.id}
@@ -907,7 +845,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                                 />
                               </FormControl>
                               <FormLabel
-                                className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 px-2 py-4 text-center font-normal ${
+                                className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-border px-2 py-4 text-center font-normal ${
                                   isChecked ? 'border-success' : ''
                                 }`}
                               >

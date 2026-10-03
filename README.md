@@ -1,37 +1,34 @@
-# Rental Cars: Self-driving Car Rental Application
+# Rental Cars Client
 
-Welcome to Rental Cars, a self-driving car rental application. This repository contains the codebase for our
-application.
+Next.js 16 (App Router) + React 19 frontend for the Rental Cars platform.
 
 ## Getting Started
 
-Follow these steps to get the application up and running on your local machine.
-
-### 1. Install Libraries
-
-First, navigate to the project directory in your terminal and install the required libraries using npm:
-
 ```bash
-yarn install
+pnpm install
+cp .env.example .env.local   # then fill in the values
+pnpm dev                     # http://localhost:3000
 ```
 
-### 2. Create .env File
+The backend must be running (see `rental-cars-backend`). Browser requests go to `/api/v1/*` on the same
+origin and are rewritten to `API_URL`, so the httpOnly auth cookies set by the backend are first-party.
 
-Create a '.env' file in the root directory of the project with the following content:
+## Scripts
 
-```makefile
-PORT=3000
-HOSTNAME=localhost
-```
+| Script           | Description                     |
+| ---------------- | ------------------------------- |
+| `pnpm dev`       | Development server              |
+| `pnpm build`     | Production build                |
+| `pnpm start`     | Run the production build        |
+| `pnpm lint`      | ESLint (flat config)            |
+| `pnpm typecheck` | TypeScript without emitting     |
 
-### 3. Run the Development Server
+## Rendering
 
-To start the development server, run the following command:
-
-```bash
-yarn run dev
-```
-
-### 4. View the Application
-
-Open your web browser and go to http://localhost:3000 to access the application.
+- Public pages (`/`, `/car/[slug]`, `/search`, guides) are server-rendered with ISR so the HTML already
+  contains the content for users and search engines. Each car page has its own metadata, Open Graph tags
+  and Product JSON-LD; `sitemap.xml` and `robots.txt` are generated from the API.
+- Search filters live in the URL (`/search?startDate=…&price=300-1000&seats=4-7`), so results are
+  shareable and paginated with real links.
+- `src/proxy.ts` reads the role from the JWT cookie, protects private routes and refreshes an expired
+  access token before the page renders.

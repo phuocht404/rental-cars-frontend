@@ -3,13 +3,9 @@
 import { LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
-import { CookiesStorage } from '@/config/cookie';
-import { useAppSelector } from '@/stores/hooks';
-import { logout } from '@/stores/reducers/authReducer';
-import { selectDep, setDependence } from '@/stores/reducers/depReducer';
+import { signOut, useCurrentUser } from '@/lib/auth-client';
 
 import { Button } from './ui/button';
 import Username from './Username';
@@ -25,65 +21,40 @@ const mobileMenuItems: { title: string; href: string }[] = [
   },
   {
     title: 'Đăng ký chủ xe',
-    href: '/owner-registration',
+    href: '/#explorer',
   },
 ];
 
 const MobileMenu = () => {
-  const dispatch = useDispatch();
-  const dep = useAppSelector(selectDep);
-  const [isLogged, setIsLogged] = useState<boolean>(false);
+  const { isLoggedIn: isLogged, user } = useCurrentUser();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  // Function to close the mobile menu when the screen size is larger than 1024px
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const closeMenu = () => {
-    if (window.innerWidth >= 1024 && isOpen) {
-      setIsOpen(false);
-    }
-  };
-
+  // Đóng menu khi màn hình đủ rộng để hiện menu desktop
   useEffect(() => {
-    // Add an event listener to check for screen size changes
-    window.addEventListener('resize', closeMenu);
+    if (!isOpen) return;
 
-    // Remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener('resize', closeMenu);
+    const closeMenu = () => {
+      if (window.innerWidth >= 1024) setIsOpen(false);
     };
-  }, [closeMenu, isOpen]);
 
-  // check login and logout
-  useEffect(() => {
-    const isLogged = CookiesStorage.getCookieData('accessToken');
+    window.addEventListener('resize', closeMenu);
+    return () => window.removeEventListener('resize', closeMenu);
+  }, [isOpen]);
 
-    if (isLogged) {
-      setIsLogged(true);
-    } else {
-      setIsLogged(false);
-    }
-  }, [dep]);
-
-  const handleLogout = () => {
-    // clear local storage
-    localStorage.removeItem('user');
-
-    // clear redux store
-    dispatch(logout());
-    dispatch(setDependence({}));
-
-    // clear cookie storage
-    CookiesStorage.clearAllCookies();
-
-    setIsLogged(false);
+  const handleLogout = async () => {
+    await signOut();
     toast.info('Đã đăng xuất!!!');
-    // redirect to home page
-    window.location.reload();
+    window.location.assign(new URL('/', window.location.origin).href);
   };
+
+  const items = [
+    ...mobileMenuItems,
+    ...(user?.role === 'CAROWNER' ? [{ title: 'Quản lý xe', href: '/mycars' }] : []),
+  ];
 
   return (
     <div className="relative z-50 hidden lg:block">
@@ -92,7 +63,7 @@ const MobileMenu = () => {
       </Button>
 
       {isOpen && (
-        <div className="fixed left-0 top-0 h-full w-full bg-[#f6f7f9]">
+        <div className="fixed left-0 top-0 h-full w-full bg-background">
           <Button
             variant="outline"
             className="absolute right-4 top-4 rounded-full"
@@ -102,23 +73,24 @@ const MobileMenu = () => {
             <X size={20} />
           </Button>
 
-          <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/4 transform rounded-lg bg-white p-4">
+          <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/4 transform rounded-lg bg-card p-4">
             {isLogged && (
               <Link href="/">
-                <Username className="text-base font-medium text-black" />
+                <Username className="text-base font-medium text-foreground" />
               </Link>
             )}
 
-            <hr className="my-4 w-full border border-solid border-gray-300/50" />
+            <hr className="my-4 w-full border border-solid border-border/50" />
 
             <ul className="flex flex-col items-center justify-center">
-              {mobileMenuItems.map(({ title, href }, index) => (
+              {items.map(({ title, href }, index) => (
                 <li
                   key={index}
-                  className="w-full cursor-pointer rounded-lg hover:bg-gray-100 hover:underline"
+                  className="w-full cursor-pointer rounded-lg hover:bg-accent hover:underline"
                 >
                   <Link
                     href={href}
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center whitespace-nowrap px-32 py-4 text-base font-medium"
                   >
                     {title}
@@ -127,7 +99,7 @@ const MobileMenu = () => {
               ))}
             </ul>
 
-            <hr className="my-4 w-full border border-solid border-gray-300/50" />
+            <hr className="my-4 w-full border border-solid border-border/50" />
 
             {/* check login */}
             {isLogged ? (
@@ -143,14 +115,14 @@ const MobileMenu = () => {
               <div className="flex items-center justify-center gap-4">
                 <Link
                   href="/signup"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 p-2 text-base font-medium hover:underline"
+                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-border p-2 text-base font-medium hover:underline"
                 >
                   Đăng ký
                 </Link>
 
                 <Link
                   href="/signin"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 bg-primary p-2 text-base font-medium text-white hover:underline"
+                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-border bg-primary p-2 text-base font-medium text-white hover:underline"
                 >
                   Đăng nhập
                 </Link>

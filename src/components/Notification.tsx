@@ -18,18 +18,18 @@ const notificationList: {
 }[] = [
   {
     title: 'Thuê Hyundai Accent dài hạn với chi phí tiết kiệm 🚗',
-    description: '🌟Ưu đãi 5-10% - chỉ từ 15 triệu/ tháng cùng Mioto ',
+    description: '🌟Ưu đãi 5-10% - chỉ từ 15 triệu/ tháng cùng Rental Cars ',
     timer: '3h trước',
   },
   {
     title: '🚙 Thuê xe 7 chỗ rộng rãi, gia đình di chuyển thoải mái',
-    description: '⚡️Giảm 300k cho lần đầu thuê xe 7 chỗ tại Mioto',
+    description: '⚡️Giảm 300k cho lần đầu thuê xe 7 chỗ tại Rental Cars',
     timer: '4h trước',
   },
   {
     title: 'Bạn ơi, Xe VINFAST FADIL 2019 đang đợi chốt!',
     description:
-      'Kèo thì đã lên, deal cũng đã có. Mở MIOTO để nhận ưu đãi 200K khi nhập THUEGAP. Chốt xe ưng ý và thuê ngay thôi!',
+      'Kèo thì đã lên, deal cũng đã có. Mở Rental Cars để nhận ưu đãi 200K khi nhập THUEGAP. Chốt xe ưng ý và thuê ngay thôi!',
     timer: '10h trước',
   },
   {
@@ -41,7 +41,7 @@ const notificationList: {
   {
     title: 'Xe HONDA CIVIC 2022 đang có deal tốt!',
     description:
-      'Nhập THUENGAY giảm ngay 200K. Giữ chỗ sớm chiếc xe yêu thích trên Mioto để không bỏ lỡ hành trình tuyệt vời của bạn!',
+      'Nhập THUENGAY giảm ngay 200K. Giữ chỗ sớm chiếc xe yêu thích trên Rental Cars để không bỏ lỡ hành trình tuyệt vời của bạn!',
     timer: '2 ngày trước',
   },
 ];
@@ -52,16 +52,16 @@ const Notification = () => {
       <HoverCardTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex h-auto w-auto items-center justify-center rounded-full p-2 hover:bg-white/20 focus:border-none focus:bg-transparent focus:ring-0 focus:ring-offset-0"
+          className="relative flex h-auto w-auto items-center justify-center rounded-full p-2 hover:bg-card/20 focus:border-none focus:bg-transparent focus:ring-0 focus:ring-offset-0"
         >
           <Bell size={20} className="text-white" />
           <div className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-96">
-        <h2 className="text-md font-bold text-black">Thông báo</h2>
+        <h2 className="text-md font-bold text-foreground">Thông báo</h2>
 
-        <hr className="mb-4 mt-1 h-[1px] w-full bg-slate-50" />
+        <hr className="mb-4 mt-1 h-px w-full bg-border" />
 
         <div>
           <ScrollArea className="h-72 w-full">
@@ -70,8 +70,8 @@ const Notification = () => {
                 <Link href="/" key={index}>
                   <div className="flex cursor-pointer flex-col items-start justify-center">
                     <h2 className="text-base font-medium">{title}</h2>
-                    <span className="text-sm text-black">{description}</span>
-                    <span className="text-xs text-gray-400">{timer}</span>
+                    <span className="text-sm text-foreground">{description}</span>
+                    <span className="text-xs text-muted-foreground">{timer}</span>
                   </div>
                 </Link>
               ))}

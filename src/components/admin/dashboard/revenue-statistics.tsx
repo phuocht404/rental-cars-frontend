@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Area,
   Bar,
@@ -12,10 +11,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { toast } from 'sonner';
 
 import { GET_REVENUE_ANALYTICS } from '@/lib/api-constants';
-import { API } from '@/services';
+import { queryKeys, useApiQuery } from '@/lib/query';
 
 interface IRevenue {
   month: string;
@@ -30,28 +28,16 @@ const RevenueStatistics = ({
   fromDay: any;
   toDay: any;
 }) => {
-  const [revenue, setRevenue] = useState<IRevenue[]>([])
-
-  const getRevenueAnalytics = async () => {
-    try {
-      const from = new Date(fromDay).toISOString()
-      const to = new Date(toDay).toISOString()
-
-      const res = await API.get(
-        `${GET_REVENUE_ANALYTICS}/?fromDay=${from}&toDay=${to}`,
-      )
-
-      if (res.status === 200) {
-        setRevenue(res.data)
-      }
-    } catch (error: any) {
-      toast.error(error.message)
-    }
-  }
-
-  useEffect(() => {
-    getRevenueAnalytics()
-  }, [fromDay, toDay])
+  const params = {
+    fromDay: new Date(fromDay).toISOString(),
+    toDay: new Date(toDay).toISOString(),
+  };
+  const { data: revenue = [] } = useApiQuery<IRevenue[]>(
+    [...queryKeys.adminAnalytics, 'revenue'],
+    GET_REVENUE_ANALYTICS,
+    params,
+    { enabled: !!fromDay && !!toDay, keepPrevious: true },
+  );
 
   return (
     <ResponsiveContainer width='100%' height={400}>

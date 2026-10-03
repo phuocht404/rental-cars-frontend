@@ -1,65 +1,74 @@
-import axios from 'axios';
-import { get } from 'lodash';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
-import { CookiesStorage } from '@/config/cookie';
+import { clearStoredUser } from '@/lib/session';
+import { store } from '@/stores/store';
+import { logout } from '@/stores/reducers/authReducer';
 
-const BE_HOSTNAME = process.env.NEXT_PUBLIC_BACKEND_HOSTNAME;
-const BE_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT;
-
-const baseURL = `http://${BE_HOSTNAME}:${BE_PORT}/api/v1/`;
-
+// Gọi qua rewrite cùng origin (/api/v1 → backend) nên cookie httpOnly được gửi kèm tự động
 const instance = axios.create({
-  timeout: 60 * 1000 * 3,
-  maxContentLength: 60 * 1000 * 3,
-});
-
-const defaultOptions = {
-  baseURL: baseURL,
+  baseURL: '/api/v1/',
+  timeout: 30 * 1000,
+  withCredentials: true,
   headers: {
     accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: '',
   },
+});
+
+const normalize = (url: string) => url.replace(/^\/+/, '');
+
+// Các endpoint tự xử lý xác thực, không thử refresh khi gặp 401
+const NO_REFRESH = /^auth\/(signin|signup|refresh|logout)/;
+
+let refreshing: Promise<boolean> | null = null;
+
+const refreshSession = () => {
+  refreshing ??= instance
+    .post('auth/refresh')
+    .then(() => true)
+    .catch(() => false)
+    .finally(() => {
+      refreshing = null;
+    });
+
+  return refreshing;
 };
 
-const _get = (url: string, params = {}, options: any = {}) => {
-  return instance.get(baseURL + url, {
-    ...defaultOptions,
-    ...options,
-    ...{ params },
-  });
-};
+instance.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError<any>) => {
+    const original = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const url = normalize(original?.url ?? '');
 
-const post = (url: string, body = {}, options: any = {}) =>
-  instance.post(baseURL + url, body, { ...defaultOptions, ...options });
+    if (error.response?.status === 401 && original && !original._retry && !NO_REFRESH.test(url)) {
+      original._retry = true;
 
-const put = (url: string, body = {}, options: any = {}) =>
-  instance.put(baseURL + url, body, { ...defaultOptions, ...options });
-const patch = (url: string, body = {}, options: any = {}) =>
-  instance.patch(baseURL + url, body, { ...defaultOptions, ...options });
-const _delete = (url: string, options: any = {}) =>
-  instance.delete(baseURL + url, { ...defaultOptions, ...options });
+      if (await refreshSession()) return instance(original);
 
-const interceptorHandleRequest = (config: any) => {
-  const accessToken = CookiesStorage.getCookieData('accessToken');
+      // Hết phiên đăng nhập: xoá thông tin hiển thị phía client
+      clearStoredUser();
+      store.dispatch(logout());
+    }
 
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
+    return Promise.reject(
+      error.response?.data ?? { message: error.message || 'Không kết nối được tới máy chủ' },
+    );
+  },
+);
 
-  return config;
-};
+const _get = (url: string, params = {}, options: AxiosRequestConfig = {}) =>
+  instance.get(normalize(url), { ...options, params });
 
-const interceptorHandleResponse = (response: any) => response;
-const handleError = (error: any) => {
-  const errorJson = JSON.parse(JSON.stringify(error));
-  // if (errorJson?.status === 401) {
-  //   toast.error(errorJson?.error, { description: errorJson?.message });
-  // }
-  return Promise.reject(get(error, 'response.data') || errorJson);
-};
+const post = (url: string, body = {}, options: AxiosRequestConfig = {}) =>
+  instance.post(normalize(url), body, options);
 
-instance.interceptors.request.use(interceptorHandleRequest, handleError);
-instance.interceptors.response.use(interceptorHandleResponse, handleError);
+const put = (url: string, body = {}, options: AxiosRequestConfig = {}) =>
+  instance.put(normalize(url), body, options);
+
+const patch = (url: string, body = {}, options: AxiosRequestConfig = {}) =>
+  instance.patch(normalize(url), body, options);
+
+const _delete = (url: string, options: AxiosRequestConfig = {}) =>
+  instance.delete(normalize(url), options);
 
 export { _get as get, post, put, patch, _delete as destroy };

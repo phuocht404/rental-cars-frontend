@@ -10,14 +10,12 @@ import {
   Caravan,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { CookiesStorage } from '@/config/cookie';
+import { signOut } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
-import { logout } from '@/stores/reducers/authReducer';
 
 const menuAdmin = [
   {
@@ -56,19 +54,12 @@ const menuRegistration = [
 ];
 
 export function Sidebar({ className }: { className?: string }) {
-  const dispatch = useDispatch();
-  const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-
-    dispatch(logout());
-
-    CookiesStorage.clearAllCookies();
-
-    router.push('/signin');
+  const handleLogout = async () => {
+    await signOut();
     toast.info('Đã đăng xuất!!!');
+    window.location.assign(new URL('/signin', window.location.origin).href);
   };
 
   return (

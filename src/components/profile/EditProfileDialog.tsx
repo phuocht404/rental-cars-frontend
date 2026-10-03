@@ -1,7 +1,7 @@
 'use client';
 
 import { Pen } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
 
 import EditProfileForm from '@/components/forms/EditProfileForm';
 import { Button } from '@/components/ui/button';
@@ -12,42 +12,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { API } from '@/services';
 
 interface EditProfileDialogProps {
-  name: string;
-  dateOfBirth: Date;
-  gender: string;
+  name?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
 }
 
-export function EditProfileDialog({
-  name,
-  dateOfBirth,
-  gender,
-}: EditProfileDialogProps) {
-  const updateProfile = async () => {
-    try {
-      const payload = {
-        name: name,
-        dateOfBirth: dateOfBirth,
-        gender: gender,
-      };
-
-      const res = await API.put('/users/me', payload);
-    } catch (error: any) {
-      toast.error(error.error, {
-        description: error.message,
-      });
-    }
-  };
+export function EditProfileDialog({ name, dateOfBirth, gender }: EditProfileDialogProps) {
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full bg-transparent hover:bg-gray-100"
+          aria-label="Sửa thông tin"
+          className="h-8 w-8 rounded-full bg-transparent hover:bg-accent"
         >
           <Pen size={16} />
         </Button>
@@ -61,6 +43,7 @@ export function EditProfileDialog({
           name={name}
           dateOfBirth={dateOfBirth}
           gender={gender}
+          onSuccess={() => setOpen(false)}
         />
       </DialogContent>
     </Dialog>
