@@ -1,7 +1,6 @@
 'use client';
 
 import { CheckSquare, Square } from 'lucide-react';
-import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -11,10 +10,12 @@ import { queryKeys, useApiQuery } from '@/lib/query';
 import { ColorEnum } from '@/types/enums';
 import BackButton from '@/components/back-button';
 
-const HopDongThueXe = () => {
+const HopDongThueXe = ({ orderDetailId }: { orderDetailId: string }) => {
   const pdfRef = useRef<HTMLDivElement>(null);
-  const { slug } = useParams<{ slug: string }>();
-  const { data: orderDetail = {} } = useApiQuery<any>(queryKeys.orderDetail(slug), `${GET_ORDER_DETAIL_BY_ID}/${slug}`);
+  const { data: orderDetail = {} } = useApiQuery<any>(
+    queryKeys.orderDetail(orderDetailId),
+    `${GET_ORDER_DETAIL_BY_ID}/${orderDetailId}`,
+  );
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
 

@@ -1,12 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   GET_ORDER_BY_ID,
   UPDATE_ORDER_DETAIL_STATUS_BY_ID,
@@ -17,6 +18,9 @@ import { API } from '@/services';
 import { OrderDetailStatusEnum } from '@/types/enums';
 import BackButton from '@/components/back-button';
 import ReviewDialog from '@/components/review-dialog';
+
+// Hợp đồng chỉ có ý nghĩa khi chủ xe đã xác nhận chuyến
+const CONTRACT_STATUSES = ['CONFIRMED', 'RECEIVED', 'COMPLETED'];
 
 const OrderPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -51,8 +55,6 @@ const OrderPage = () => {
             <BackButton />
             <h3 className="text-2xl font-bold">Thông tin đơn hàng</h3>
           </div>
-
-          <Button>Tạo hợp đồng</Button>
         </header>
       </div>
 
@@ -208,6 +210,14 @@ const OrderPage = () => {
                             Trả xe
                           </Button>
                         )} */}
+                      {CONTRACT_STATUSES.includes(orderDetail?.orderDetailStatus) && (
+                        <Link
+                          href={`/mytrips/${slug}/contract/${orderDetail?.id}`}
+                          className={buttonVariants({ variant: 'outline' })}
+                        >
+                          Xem hợp đồng
+                        </Link>
+                      )}
                       {!orderDetail?.review?.id && (
                         <>
                           {orderDetail?.orderDetailStatus === 'COMPLETED' && (
