@@ -3,49 +3,60 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Design tokens (HSL, dạng "H S% L%" để dùng với hsl(var(--x) / alpha)).
+   * Một màu nhấn duy nhất: xanh cobalt (--primary). Trạng thái dùng success/warning/destructive.
+   * Bo góc: nút và ô nhập = --radius (10px), card = rounded-2xl (16px), ảnh trong card = rounded-xl (12px).
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 224 76% 48%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 222 47% 14%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 214 32% 94%;
+    --accent-foreground: 222 47% 14%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --success: 152 60% 34%;
+    --warning: 38 92% 44%;
+    --info: 217 91% 55%;
+    --border: 214 24% 89%;
+    --input: 214 20% 80%;
+    --ring: 224 76% 48%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 224 30% 7%;
+    --foreground: 210 40% 96%;
+    --card: 224 28% 10%;
+    --card-foreground: 210 40% 96%;
+    --popover: 224 28% 10%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 217 91% 62%;
+    --primary-foreground: 224 40% 8%;
+    --secondary: 223 22% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 223 22% 15%;
+    --muted-foreground: 215 18% 68%;
+    --accent: 223 22% 17%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 62% 42%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --success: 152 55% 45%;
+    --warning: 38 92% 55%;
+    --info: 217 91% 65%;
+    --border: 223 20% 18%;
+    --input: 223 20% 26%;
+    --ring: 217 91% 62%;
   }
 }
 
@@ -56,6 +67,12 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 }
 

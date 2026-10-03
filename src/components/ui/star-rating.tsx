@@ -6,31 +6,31 @@ const StarRating = ({ rating }: any) => {
       <span>
         <Star
           size={16}
-          className={rating >= 1 ? 'text-yellow-300' : 'text-gray-500'}
+          className={rating >= 1 ? 'text-yellow-300' : 'text-muted-foreground'}
         />
       </span>
       <span>
         <Star
           size={16}
-          className={rating >= 2 ? 'text-yellow-300' : 'text-gray-500'}
+          className={rating >= 2 ? 'text-yellow-300' : 'text-muted-foreground'}
         />
       </span>
       <span>
         <Star
           size={16}
-          className={rating >= 3 ? 'text-yellow-300' : 'text-gray-500'}
+          className={rating >= 3 ? 'text-yellow-300' : 'text-muted-foreground'}
         />
       </span>
       <span>
         <Star
           size={16}
-          className={rating >= 4 ? 'text-yellow-300' : 'text-gray-500'}
+          className={rating >= 4 ? 'text-yellow-300' : 'text-muted-foreground'}
         />
       </span>
       <span>
         <Star
           size={16}
-          className={rating >= 5 ? 'text-yellow-300' : 'text-gray-500'}
+          className={rating >= 5 ? 'text-yellow-300' : 'text-muted-foreground'}
         />
       </span>
     </div>

@@ -8,21 +8,14 @@ module.exports = {
     './src/**/*.{ts,tsx}',
   ],
   theme: {
+    // Breakpoint max-width (desktop-first). Phải khai báo từ lớn đến nhỏ
+    // để breakpoint nhỏ hơn ghi đè breakpoint lớn hơn khi màn hình hẹp.
     screens: {
-      sm: { max: '640px' },
-      // => @media (max-width: 640px) { ... }
-
-      md: { max: '768px' },
-      // => @media (max-width: 768px) { ... }
-
-      lg: { max: '1024px' },
-      // => @media (max-width: 1024px) { ... }
-
-      xl: { max: '1280px' },
-      // => @media (max-width: 1280px) { ... }
-
       '2xl': { max: '1536px' },
-      // => @media (max-width: 1536px) { ... }
+      xl: { max: '1280px' },
+      lg: { max: '1024px' },
+      md: { max: '768px' },
+      sm: { max: '640px' },
     },
     container: {
       center: true,
@@ -36,10 +29,10 @@ module.exports = {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
-        info: '#3b82f6',
-        success: '#22c55e',
-        error: '#ef4444',
-        warning: '#eab308',
+        info: 'hsl(var(--info) / <alpha-value>)',
+        success: 'hsl(var(--success) / <alpha-value>)',
+        error: 'hsl(var(--destructive) / <alpha-value>)',
+        warning: 'hsl(var(--warning) / <alpha-value>)',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
