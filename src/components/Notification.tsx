@@ -52,16 +52,16 @@ const Notification = () => {
       <HoverCardTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex h-auto w-auto items-center justify-center rounded-full p-2 hover:bg-white/20 focus:border-none focus:bg-transparent focus:ring-0 focus:ring-offset-0"
+          className="relative flex h-auto w-auto items-center justify-center rounded-full p-2 hover:bg-card/20 focus:border-none focus:bg-transparent focus:ring-0 focus:ring-offset-0"
         >
           <Bell size={20} className="text-white" />
           <div className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-96">
-        <h2 className="text-md font-bold text-black">Thông báo</h2>
+        <h2 className="text-md font-bold text-foreground">Thông báo</h2>
 
-        <hr className="mb-4 mt-1 h-[1px] w-full bg-slate-50" />
+        <hr className="mb-4 mt-1 h-px w-full bg-border" />
 
         <div>
           <ScrollArea className="h-72 w-full">
@@ -70,8 +70,8 @@ const Notification = () => {
                 <Link href="/" key={index}>
                   <div className="flex cursor-pointer flex-col items-start justify-center">
                     <h2 className="text-base font-medium">{title}</h2>
-                    <span className="text-sm text-black">{description}</span>
-                    <span className="text-xs text-gray-400">{timer}</span>
+                    <span className="text-sm text-foreground">{description}</span>
+                    <span className="text-xs text-muted-foreground">{timer}</span>
                   </div>
                 </Link>
               ))}
