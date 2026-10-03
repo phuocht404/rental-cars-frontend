@@ -25,7 +25,7 @@ const SearchForm = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={cn('flex gap-2 rounded-lg bg-white p-6 shadow-lg', className)}
+      className={cn('flex gap-2 rounded-lg bg-card p-6 shadow-lg', className)}
     >
       <Popover>
         <PopoverTrigger asChild>
@@ -38,8 +38,8 @@ const SearchForm = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
               !date && 'text-muted-foreground',
             )}
           >
-            <span className="text-2xl font-normal text-black">
-              <span className="flex items-center justify-start text-base font-normal text-gray-500">
+            <span className="text-2xl font-normal text-foreground">
+              <span className="flex items-center justify-start text-base font-normal text-muted-foreground">
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 Bắt đầu
               </span>
@@ -50,10 +50,10 @@ const SearchForm = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
               )}
             </span>
 
-            <hr className="mx-10 my-4 h-3/5 w-[1px] bg-gray-200" />
+            <hr className="mx-10 my-4 h-3/5 w-[1px] bg-accent" />
 
-            <span className="text-2xl font-normal text-black">
-              <span className="flex items-center justify-start text-base font-normal text-gray-500">
+            <span className="text-2xl font-normal text-foreground">
+              <span className="flex items-center justify-start text-base font-normal text-muted-foreground">
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 kết thúc
               </span>

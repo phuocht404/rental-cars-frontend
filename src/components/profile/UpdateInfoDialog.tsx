@@ -23,7 +23,7 @@ const UpdateInfoDialog = ({ label, name, data }: UpdateInfoDialogProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full bg-transparent hover:bg-gray-100"
+          className="h-8 w-8 rounded-full bg-transparent hover:bg-accent"
         >
           <Pen size={13} />
         </Button>

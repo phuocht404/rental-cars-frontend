@@ -67,23 +67,23 @@ export function UserInfoAlertDialog({
                   <AvatarFallback>Avatar</AvatarFallback>
                 </Avatar>
 
-                <span className="text-xl font-bold text-black">
+                <span className="text-xl font-bold text-foreground">
                   {user?.name}
                 </span>
 
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   Tham gia từ {formatDateToDMY(user?.createdAt)}
                 </span>
               </div>
 
-              <div className="flex h-full w-2/3 flex-col items-center justify-start gap-3 text-black">
+              <div className="flex h-full w-2/3 flex-col items-center justify-start gap-3 text-foreground">
                 <div className="mb-4 flex w-full items-center justify-around gap-3 rounded-lg bg-primary/20 p-2">
                   <div className=" inline-flex flex-col items-center justify-center gap-1">
-                    <span className="text-gray-800">Số chuyến</span>
+                    <span className="text-foreground">Số chuyến</span>
                     <span className="font-bold">{user?.trips}</span>
                   </div>
                   <div className="inline-flex flex-col items-center justify-center gap-1">
-                    <span className="text-gray-800">Tỉ lệ đồng ý</span>
+                    <span className="text-foreground">Tỉ lệ đồng ý</span>
                     <span className="font-bold">{user?.successRate}%</span>
                   </div>
                 </div>

@@ -17,10 +17,10 @@ const HoverCardCustom = ({
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <HelpCircle className={cn('h-4 w-4 text-gray-500', className)} />
+        <HelpCircle className={cn('h-4 w-4 text-muted-foreground', className)} />
       </HoverCardTrigger>
       <HoverCardContent className="">
-        <div className="text-center text-xs text-gray-500">{content}</div>
+        <div className="text-center text-xs text-muted-foreground">{content}</div>
       </HoverCardContent>
     </HoverCard>
   );

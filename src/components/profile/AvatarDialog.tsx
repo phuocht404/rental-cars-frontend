@@ -129,7 +129,7 @@ const AvatarDialog = ({
           <div className="w-full text-center">
             <label
               htmlFor="files"
-              className="block cursor-pointer rounded-lg border border-gray-200 px-3 py-2"
+              className="block cursor-pointer rounded-lg border border-border px-3 py-2"
             >
               Chọn ảnh
             </label>
