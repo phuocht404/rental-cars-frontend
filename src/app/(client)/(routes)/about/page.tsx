@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import React from 'react';
 
@@ -37,6 +38,12 @@ const advantageList: {
   },
 ];
 
+export const metadata: Metadata = {
+  title: 'Giới thiệu',
+  description: 'Rental Cars - nền tảng kết nối chủ xe và khách thuê xe tự lái tại Đà Nẵng.',
+  alternates: { canonical: '/about' },
+};
+
 const AboutPage = () => {
   return (
     <div className="flex flex-col gap-16">
@@ -65,7 +72,7 @@ const AboutPage = () => {
 
       <Reveal>
         <Image
-          src="/images/banner-about.png"
+          src="/images/banner-about.webp"
           alt="Khách hàng cùng chiếc xe thuê trên hành trình"
           width={1280}
           height={519}

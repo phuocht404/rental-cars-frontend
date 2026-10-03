@@ -2,27 +2,17 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+
+import { useCurrentUser } from '@/lib/auth-client';
 
 import { Button } from '../ui/button';
 import OwnerRegistrationDialog from './owner-registration-dialog';
 
 const Explorer = () => {
-  const [isLogged, setIsLogged] = useState<boolean>(false);
-
-  const getRole = () => {
-    const userInfo: any = JSON.parse(localStorage.getItem('user') || '{}');
-    if (userInfo) {
-      if (userInfo.role && userInfo?.role === 'TRAVELER') {
-        setIsLogged(true);
-        return;
-      }
-    }
-  };
-
-  useEffect(() => {
-    getRole();
-  }, []);
+  const { user } = useCurrentUser();
+  // Chỉ người thuê (chưa là chủ xe) mới thấy nút đăng ký chủ xe
+  const isLogged = user?.role === 'TRAVELER';
 
   return (
     <section

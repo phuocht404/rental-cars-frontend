@@ -1,70 +1,34 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { RootState } from '@/stores/store';
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  password: string;
-  email: string;
-  phone: string;
-  roleId: string;
-  avatarUrl: string;
-  createdAt: string;
-  updatedAt: string;
-  role: string;
-}
+import type { SessionUser } from '@/lib/session';
+import type { RootState } from '@/stores/store';
 
 interface AuthState {
-  user: User | object;
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-  dep?: any;
-  loading: boolean;
-  error?: null;
-  success: boolean;
+  user: SessionUser | null;
+  // true khi đã đọc xong session ở client (tránh nháy giao diện "chưa đăng nhập")
+  ready: boolean;
 }
+
+const initialState: AuthState = { user: null, ready: false };
 
 const authReducer = createSlice({
   name: 'auth',
-  initialState: {
-    user: {},
-    tokens: {
-      accessToken: '',
-      refreshToken: '',
-    },
-    dep: '',
-    loading: false,
-    error: null,
-    success: false,
-  } as AuthState,
+  initialState,
   reducers: {
-    setStatus: (state) => {
-      state.dep = Math.random();
-    },
-    setUser(state, action) {
+    setUser(state, action: PayloadAction<SessionUser | null>) {
       state.user = action.payload;
-      state.dep = Math.random();
+      state.ready = true;
     },
-    setTokens(state, action) {
-      state.tokens.accessToken = action.payload;
-    },
-    //   logout
     logout(state) {
-      state.user = {};
-      state.tokens.accessToken = '';
-      state.tokens.refreshToken = '';
-      state.dep = Math.random();
+      state.user = null;
+      state.ready = true;
     },
   },
 });
 
-export const { setUser, setTokens, logout } = authReducer.actions;
+export const { setUser, logout } = authReducer.actions;
 
 export default authReducer.reducer;
 
-export const selectUsers = () => (state: RootState) => state.auth.user;
-export const selectStatus = () => (state: RootState) => state.auth.dep;
+export const selectCurrentUser = (state: RootState) => state.auth.user;
+export const selectAuthReady = (state: RootState) => state.auth.ready;

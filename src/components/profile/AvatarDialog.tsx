@@ -2,7 +2,8 @@
 
 import { Camera, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { UPLOAD_AVATAR } from '@/lib/api-constants';
+import { setSession, useCurrentUser } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { API } from '@/services';
 
@@ -25,17 +27,18 @@ const AvatarDialog = ({
   src,
   className,
 }: {
-  src: string;
+  src?: string | null;
   className: string;
 }) => {
+  const router = useRouter();
+  const { user } = useCurrentUser();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>(src);
+  // Ảnh mới chọn (chưa lưu); không có thì hiển thị ảnh hiện tại từ props
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const avatarUrl = previewUrl ?? src ?? '';
   const [fileImage, setFileImage] = useState<any>(null);
 
-  useEffect(() => {
-    setAvatarUrl(src);
-  }, [src]);
 
   function handleFileChange(e: any) {
     const file = e.target.files[0];
@@ -45,12 +48,12 @@ const AvatarDialog = ({
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setAvatarUrl(reader.result as string);
+      setPreviewUrl(reader.result as string);
     };
   }
 
   function handleCancer() {
-    setAvatarUrl(src);
+    setPreviewUrl(null);
     setIsLoading(false);
   }
 
@@ -75,17 +78,18 @@ const AvatarDialog = ({
 
       if (avatar.status === 200) {
         toast.success('Cập nhật ảnh đại diện thành công');
+        if (user) setSession({ ...user, avatarUrl: avatar.data?.avatarUrl });
         setIsOpen(false);
-        setIsLoading(false);
+        // Làm mới dữ liệu server component thay vì tải lại toàn trang
+        setPreviewUrl(null);
+        router.refresh();
       } else {
         toast.error('Cập nhật ảnh đại diện thất bại');
-        setIsLoading(false);
-        setFileImage(src);
+        setFileImage(null);
       }
-      window.location.reload();
     } catch (error: any) {
-      toast.error(error?.error, { description: error?.message });
-      setFileImage(src);
+      toast.error('Cập nhật ảnh đại diện thất bại', { description: error?.message });
+      setFileImage(null);
     } finally {
       setIsLoading(false);
     }

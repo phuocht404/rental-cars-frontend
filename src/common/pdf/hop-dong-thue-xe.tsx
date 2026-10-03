@@ -1,50 +1,36 @@
 'use client';
 
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { CheckSquare, Square } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { GET_ORDER_DETAIL_BY_ID } from '@/lib/api-constants';
 import { formatCurrency, formatDateToDMY, numberToText } from '@/lib/utils';
-import { API } from '@/services';
+import { queryKeys, useApiQuery } from '@/lib/query';
 import { ColorEnum } from '@/types/enums';
 import BackButton from '@/components/back-button';
 
 const HopDongThueXe = () => {
-  const pdfRef = useRef<any>();
-  const [orderDetail, setOrderDetail] = useState<any>({});
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const { slug } = useParams<{ slug: string }>();
+  const { data: orderDetail = {} } = useApiQuery<any>(queryKeys.orderDetail(slug), `${GET_ORDER_DETAIL_BY_ID}/${slug}`);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
-  const pathname = usePathname();
 
-  const getOrderDetailById = async () => {
-    try {
-      const res = await API.get(
-        GET_ORDER_DETAIL_BY_ID + `/${pathname.split('/')[2]}`,
-      );
 
-      if (res.status === 200) {
-        setOrderDetail(res.data);
-      }
-
-      return;
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  useEffect(() => {
-    getOrderDetailById();
-  }, []);
-
-  const handleDownloadPDF = () => {
-    setIsDownloading(true);
-    const pdf = new jsPDF('p', 'mm', 'a4', true);
+  const handleDownloadPDF = async () => {
     const pdfContainer = pdfRef.current;
+    if (!pdfContainer) return;
+
+    setIsDownloading(true);
+
+    // Hai thư viện này nặng (~400KB) nên chỉ tải khi người dùng thực sự bấm tải hợp đồng
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
+    const pdf = new jsPDF('p', 'mm', 'a4', true);
 
     const options = {
       scale: 2, // Increase scale for better resolution

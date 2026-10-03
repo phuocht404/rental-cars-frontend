@@ -1,79 +1,42 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import React from 'react';
 
 import { columns } from '@/app/(client)/(routes)/(profiles)/mytrips/columns';
-import {
-  orderStatus,
-  paymentStatus,
-} from '@/app/(client)/(routes)/(profiles)/mytrips/data';
+import { orderStatus, paymentStatus } from '@/app/(client)/(routes)/(profiles)/mytrips/data';
 import { DataTable } from '@/components/admin/tables/data-table';
 import TableSkeleton from '@/components/skeletons/table-skeleton';
 import { GET_MY_ORDERS } from '@/lib/api-constants';
-import { API } from '@/services';
-import { useAppSelector } from '@/stores/hooks';
-import { selectDep } from '@/stores/reducers/depReducer';
+import { queryKeys, useApiQuery } from '@/lib/query';
+import { useServerTable } from '@/lib/use-server-table';
+
+const filterOrders = [{ orderStatus }, { paymentStatus }];
+const FILTER_COLUMNS = ['orderStatus', 'paymentStatus'];
+const initVisibleColumns = ['id', 'deposits', 'totalAmount', 'orderStatus', 'paymentStatus', 'createdAt', 'actions'];
 
 const Mytrips = () => {
-  const [orders, setOrders] = useState();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dep = useAppSelector(selectDep);
-
-  const filterOrderDetail = [{ orderStatus }, { paymentStatus }];
-
-  const initVisibleColumns = [
-    'id',
-    'deposits',
-    'totalAmount',
-    'orderStatus',
-    'paymentStatus',
-    'createdAt',
-    'actions',
-  ];
-
-  const getOrder = async () => {
-    setIsLoading(true);
-    try {
-      const res = await API.get(GET_MY_ORDERS);
-
-      if (res.status === 200) {
-        setOrders(res.data.data);
-      }
-
-      setIsLoading(false);
-    } catch (error: any) {
-      toast.error(error.message);
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getOrder();
-  }, [dep]);
+  const { params, tableState } = useServerTable({ filterColumns: FILTER_COLUMNS });
+  const { data, isPending, isFetching } = useApiQuery<any>(queryKeys.myTrips, GET_MY_ORDERS, params, {
+    keepPrevious: true,
+  });
 
   return (
     <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">
-      <div className="mb-10">
-        <header className="flex items-center justify-between">
-          <h3 className="text-2xl font-bold">Đơn đặt xe</h3>
-        </header>
-      </div>
+      <header className="mb-10 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Lịch sử thuê xe</h1>
+      </header>
 
-      <div>
-        {orders ? (
-          <DataTable
-            columns={columns}
-            data={orders}
-            filters={filterOrderDetail}
-            initVisibleColumns={initVisibleColumns}
-          />
-        ) : (
-          <TableSkeleton />
-        )}
-      </div>
+      {isPending ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={data?.data ?? []}
+          filters={filterOrders}
+          initVisibleColumns={initVisibleColumns}
+          server={{ ...tableState, pageCount: data?.meta?.totalPages ?? 1, isFetching }}
+        />
+      )}
     </div>
   );
 };

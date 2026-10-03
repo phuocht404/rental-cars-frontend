@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -11,27 +12,20 @@ import {
   UPDATE_ORDER_DETAIL_STATUS_BY_ID,
 } from '@/lib/api-constants';
 import { cn, formatCurrency, formatDateToDMY } from '@/lib/utils';
+import { apiErrorMessage, queryKeys, useApiQuery } from '@/lib/query';
 import { API } from '@/services';
 import { OrderDetailStatusEnum } from '@/types/enums';
 import BackButton from '@/components/back-button';
 import ReviewDialog from '@/components/review-dialog';
 
 const OrderPage = () => {
-  const [order, setOrder] = useState<any>();
-  const pathname = usePathname();
+  const { slug } = useParams<{ slug: string }>();
+  const queryClient = useQueryClient();
+  const { data: order, refetch } = useApiQuery<any>(queryKeys.trip(slug), `${GET_ORDER_BY_ID}/${slug}`);
 
-  const getOrderById = async () => {
-    try {
-      const res = await API.get(GET_ORDER_BY_ID + `/${pathname.split('/')[2]}`);
-
-      if (res.status === 200) {
-        setOrder(res.data);
-      }
-
-      return;
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+  const getOrderById = () => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: queryKeys.myTrips });
   };
 
   const handleUpdateOrder = async (id: string, status: string) => {
@@ -45,13 +39,9 @@ const OrderPage = () => {
         getOrderById();
       }
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     }
   };
-
-  useEffect(() => {
-    getOrderById();
-  }, []);
 
   return (
     <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">

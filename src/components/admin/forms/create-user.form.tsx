@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -36,21 +37,11 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { CREATE_USER, GET_USER_BY_ID, UPDATE_USER } from '@/lib/api-constants';
-import { cn, convertBase64 } from '@/lib/utils';
+import { uploadImageToCloudinary } from '@/lib/cloudinary-upload';
+import { cn } from '@/lib/utils';
+import { apiErrorMessage, queryKeys, useApiQuery } from '@/lib/query';
 import { API } from '@/services';
 
-interface UserTypes {
-  name?: string;
-  username?: string;
-  password?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  gender?: string;
-  dateOfBirth?: Date;
-  avatarUrl?: string;
-  role?: string;
-}
 
 const genders = [
   {
@@ -84,80 +75,55 @@ const roles = [
 
 export function CreateUserForm({ slug }: { slug: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedImage, setSelectedImage] = useState<any>();
-  const [avatarSrc, setAvatarSrc] = useState<any>(undefined);
+  const [selectedImage, setSelectedImage] = useState<File | undefined>();
+  const [avatarSrc, setAvatarSrc] = useState<string | undefined>(undefined);
+  const isNew = slug === 'new';
+  const { data: user } = useApiQuery<any>(queryKeys.user(slug), `${GET_USER_BY_ID}/${Number(slug)}`, undefined, {
+    enabled: !isNew,
+  });
+  // Ảnh vừa chọn (xem trước) hoặc ảnh hiện tại của người dùng
+  const avatarPreview = avatarSrc ?? user?.avatarUrl;
 
   const form = useForm<z.infer<typeof createUserSchema>>({
     resolver: zodResolver(createUserSchema),
   });
 
-  const getCarById = async (id: string) => {
-    try {
-      const res = await API.get(GET_USER_BY_ID + `/${Number(id)}`);
-
-      if (res.status === 200) {
-        const userData = {
-          name: res.data.name,
-          username: res.data.username,
-          password: res.data.password || '',
-          email: res.data.email,
-          phone: res.data.phone || '',
-          gender: res.data.gender,
-          dateOfBirth: res.data.dateOfBirth || '',
-          avatarUrl: '',
-          role: res.data.role,
-        };
-
-        form.reset(userData);
-        setAvatarSrc(res.data.avatarUrl);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
   async function onSubmit(values: z.infer<typeof createUserSchema>) {
     setIsLoading(true);
     try {
+      // Ảnh mới được upload thẳng lên Cloudinary, backend chỉ nhận URL (không còn gửi base64 nặng)
+      const avatarUrl = selectedImage
+        ? await uploadImageToCloudinary(selectedImage, 'rental-cars-cloudinary/avatars')
+        : undefined;
+
+      const payload = {
+        ...values,
+        avatarUrl,
+        dateOfBirth: values.dateOfBirth ? new Date(values.dateOfBirth).toISOString() : undefined,
+      };
+
       if (slug === 'new') {
-        values.avatarUrl = avatarSrc;
-
-        // Update the values with the avatarUrl
-        const res = await API.post(CREATE_USER, values);
-
-        if (res.status === 201) {
-          toast.success('Tạo người dùng thành công!');
-          setIsLoading(false);
-          router.push('/admin/users');
-        }
+        await API.post(CREATE_USER, payload);
+        toast.success('Tạo người dùng thành công!');
       } else {
-        if (values.avatarUrl !== avatarSrc) {
-          values.avatarUrl = avatarSrc;
-        }
-
-        if (values.dateOfBirth) {
-          values.dateOfBirth = values.dateOfBirth.toISOString() as any;
-        }
-
-        const res = await API.patch(UPDATE_USER + `/${Number(slug)}`, values);
-
-        if (res.status === 200) {
-          toast.success('Cập nhật người dùng thành công!');
-          setIsLoading(false);
-          router.push('/admin/users');
-        }
+        await API.patch(UPDATE_USER + `/${Number(slug)}`, payload);
+        toast.success('Cập nhật người dùng thành công!');
       }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers });
+      router.push('/admin/users');
     } catch (error: any) {
-      setIsLoading(false);
-      toast.error(error?.message);
+      toast.error(apiErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   }
 
+  // Nạp dữ liệu vào form khi tải xong
   useEffect(() => {
-    if (slug === 'new') {
+    if (isNew) {
       form.reset({
         name: '',
         username: '',
@@ -169,10 +135,20 @@ export function CreateUserForm({ slug }: { slug: string }) {
         avatarUrl: '',
         role: '',
       });
-    } else {
-      getCarById(slug);
+    } else if (user) {
+      form.reset({
+      name: user.name,
+      username: user.username,
+      password: '',
+      email: user.email,
+      phone: user.phone || '',
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth) : undefined,
+      avatarUrl: '',
+      role: user.role,
+    });
     }
-  }, [slug]);
+  }, [isNew, user, form]);
 
   return (
     <Form {...form}>
@@ -183,9 +159,9 @@ export function CreateUserForm({ slug }: { slug: string }) {
           render={({ field }) => (
             <FormItem className="flex flex-col items-center justify-center gap-1">
               <div className="h-28 w-28 overflow-hidden bg-slate-100">
-                {avatarSrc && (
+                {avatarPreview && (
                   <Image
-                    src={avatarSrc}
+                    src={avatarPreview}
                     alt="avatar"
                     width={112}
                     height={112}
@@ -204,8 +180,8 @@ export function CreateUserForm({ slug }: { slug: string }) {
                     const file = e.target.files?.[0];
                     if (file) {
                       setSelectedImage(file);
-
-                      convertBase64(file).then((res) => setAvatarSrc(res));
+                      // Xem trước bằng object URL thay vì đọc cả file thành base64
+                      setAvatarSrc(URL.createObjectURL(file));
                     }
                     field.onChange(e);
                   }}

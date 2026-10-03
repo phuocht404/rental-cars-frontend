@@ -57,7 +57,7 @@ export function SignUpFrom() {
         }
 
         setIsLoading(false);
-      } catch (error) {
+      } catch {
         setIsLoading(false);
         toast.error('Đăng ký thất bại!!!');
       } finally {

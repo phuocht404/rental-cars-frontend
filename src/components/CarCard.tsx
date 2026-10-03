@@ -19,7 +19,7 @@ interface CarCardProps {
   trips: number;
   rating: number;
   status: string;
-  orderDetails: any[];
+  orderDetails?: any[];
 }
 
 const CarCard = ({
@@ -32,7 +32,7 @@ const CarCard = ({
   trips,
   rating,
   status,
-  orderDetails,
+  orderDetails = [],
 }: CarCardProps) => {
   return (
     <Link

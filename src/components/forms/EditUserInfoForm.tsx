@@ -4,7 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
+import {
+  apiErrorMessage,
+  useUpdateProfile,
+} from '@/components/profile/use-update-profile';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -15,30 +20,45 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { editProfileSchema } from '@/schemas/';
+
+const schemas = {
+  phone: z.object({
+    value: z.string().trim().regex(/^\+?\d{9,14}$/, 'Số điện thoại không hợp lệ'),
+  }),
+  email: z.object({
+    value: z.string().trim().email('Email không hợp lệ'),
+  }),
+};
 
 const EditUserInfoForm = ({
   label,
   name,
   data,
+  onSuccess,
 }: {
   label: string;
-  name: string;
-  data: any;
+  name: 'phone' | 'email';
+  data?: string | null;
+  onSuccess?: () => void;
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const updateProfile = useUpdateProfile();
 
-  const form = useForm({
-    resolver: zodResolver(editProfileSchema),
+  const form = useForm<{ value: string }>({
+    resolver: zodResolver(schemas[name]),
+    defaultValues: { value: data ?? '' },
   });
 
-  async function onSubmit(values: any) {
+  async function onSubmit({ value }: { value: string }) {
+    setIsLoading(true);
     try {
-      console.log(values);
+      await updateProfile({ [name]: value });
+      toast.success(`Cập nhật ${label} thành công`);
+      onSuccess?.();
     } catch (error: any) {
-      toast.error(error?.error, { description: error?.message });
+      toast.error(apiErrorMessage(error));
     } finally {
-      setIsLoading(true);
+      setIsLoading(false);
     }
   }
 
@@ -47,12 +67,16 @@ const EditUserInfoForm = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name={name}
+          name="value"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{label}:</FormLabel>
+              <FormLabel className="capitalize">{label}:</FormLabel>
               <FormControl>
-                <Input {...field} value={data ? data : ''} />
+                <Input
+                  {...field}
+                  type={name === 'email' ? 'email' : 'tel'}
+                  autoComplete={name === 'email' ? 'email' : 'tel'}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

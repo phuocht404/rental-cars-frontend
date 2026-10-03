@@ -145,18 +145,24 @@ input {
 }
 
 /* Scroll reveal: phần tử xuất hiện khi cuộn tới (xem components/reveal.tsx) */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.6s ease-out,
-    transform 0.6s ease-out;
-  transition-delay: var(--reveal-delay, 0ms);
+/* Không bao giờ ẩn nội dung chờ JavaScript: chỉ chạy hiệu ứng khi trình duyệt hỗ trợ scroll-driven animation */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
 }
 
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 :focus-visible {
@@ -175,7 +181,6 @@ input {
   }
 
   .reveal {
-    opacity: 1;
-    transform: none;
+    animation: none;
   }
 }

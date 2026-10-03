@@ -1,7 +1,7 @@
 'use client';
 
 import { Delete } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -16,11 +16,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DELETE_CAR } from '@/lib/api-constants';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
-import { setDependence } from '@/stores/reducers/depReducer';
 
 export function DeleteCarDialog({ data }: { data: any }) {
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     const res = await API.destroy(DELETE_CAR + `/${data.id}`);
@@ -28,7 +28,8 @@ export function DeleteCarDialog({ data }: { data: any }) {
     if (res.status === 200) {
       toast.success('Xóa thành công');
       //   load data
-      dispatch(setDependence({}));
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminCars });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myCars });
     } else {
       toast.error('Xóa thất bại');
     }

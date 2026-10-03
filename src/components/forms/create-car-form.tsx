@@ -32,12 +32,15 @@ import {
   GET_ALL_FEATURES,
   GET_BRANDS_AND_MODELS,
   GET_CAR_BY_ID,
-  UPDATE_USER,
+  UPDATE_CAR,
 } from '@/lib/api-constants';
+import { uploadImageToCloudinary } from '@/lib/cloudinary-upload';
 import { cn } from '@/lib/utils';
 import { createCarSchema } from '@/schemas';
+import { queryKeys, useApiQuery } from '@/lib/query';
 import { API } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   AirVent,
@@ -166,10 +169,28 @@ export const featureOptions = [
 export function CreateCarForm({ slug }: { slug: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<any[]>([]);
-  const [carImages, setCarImages] = useState<any[]>([]);
-  const [brandData, setBrandData] = useState<any>([]);
-  const [features, setFeatures] = useState<any>([]);
-  const [province, setProvince] = useState<any>({});
+  // Ảnh xem trước khi chọn file mới; chưa chọn thì hiển thị ảnh hiện có của xe
+  const [previewImages, setPreviewImages] = useState<string[] | null>(null);
+  // Danh mục hãng/mẫu xe và tính năng ít thay đổi: cache dùng chung giữa các form
+  const { data: brandData = [] } = useApiQuery<any[]>(queryKeys.brandsWithModels, GET_BRANDS_AND_MODELS, undefined, {
+    staleTime: 10 * 60 * 1000,
+  });
+  const { data: featuresPage } = useApiQuery<any>(queryKeys.features, GET_ALL_FEATURES, { limit: 100 }, {
+    staleTime: 10 * 60 * 1000,
+  });
+  const features = featuresPage?.data ?? [];
+  const queryClient = useQueryClient();
+  // Danh sách phường/xã Đà Nẵng (mã 48) gần như không đổi: cache lâu
+  const { data: province = {} } = useQuery<any>({
+    queryKey: ['provinces', 48],
+    queryFn: () => axios.get('https://provinces.open-api.vn/api/p/48?depth=3').then((res) => res.data),
+    staleTime: Infinity,
+  });
+  const isNew = slug === 'new';
+  const { data: car } = useApiQuery<any>(queryKeys.car(slug), `${GET_CAR_BY_ID}/${Number(slug)}`, undefined, {
+    enabled: !isNew,
+  });
+  const carImages: string[] = previewImages ?? car?.CarImage ?? [];
 
   const router = useRouter();
 
@@ -177,112 +198,9 @@ export function CreateCarForm({ slug }: { slug: string }) {
     resolver: zodResolver(createCarSchema),
   });
 
-  const getProvince = async () => {
-    try {
-      const { data } = await axios.get(
-        'https://provinces.open-api.vn/api/p/48?depth=3',
-      );
-
-      setProvince(data);
-      form.setValue('province_name', data.name);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const uploadImagesToCloud = async (files: any) => {
-    try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-      const imagesArr: any[] = [];
-
-      const uploadPromises = files.map(async (file: any) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('cloud_name', cloudName as string);
-        formData.append('upload_preset', uploadPreset as string);
-        formData.append('folder', 'rental-cars-cloudinary/cars');
-
-        try {
-          const response = await axios.post(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            formData,
-          );
-
-          if (response.status === 200) {
-            imagesArr.push(response.data.url);
-          } else {
-            toast.error('Upload ảnh thất bại');
-            throw new Error('Upload ảnh thất bại');
-          }
-
-          return response.data.public_id;
-        } catch (error: any) {
-          toast.error(error.message);
-          throw error;
-        }
-      });
-
-      // const results = await Promise.all(uploadPromises);
-      // const publicIds = results.map((result) => result.public_id);
-      // const urls = results.map((result) => result.url);
-
-      return imagesArr;
-    } catch (error: any) {
-      toast.error(error.message);
-      throw error;
-    }
-  };
-
-  const getAllBrand = async () => {
-    try {
-      const res = await API.get(GET_BRANDS_AND_MODELS);
-      if (res.status === 200) {
-        setBrandData(res.data);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const getFeatures = async () => {
-    try {
-      const res = await API.get(GET_ALL_FEATURES);
-      if (res.status === 200) {
-        setFeatures(res.data.data);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const getCarById = async (id: string) => {
-    try {
-      const res = await API.get(GET_CAR_BY_ID + `/${Number(id)}`);
-
-      if (res.status === 200) {
-        const data = {
-          images: [],
-          licensePlates: res.data.licensePlates,
-          brandId: res.data.brandId,
-          modelId: res.data.modelId,
-          seats: res.data.seats,
-          yearOfManufacture: res.data.yearOfManufacture,
-          transmission: res.data.transmission,
-          fuel: res.data.fuel,
-          description: res.data.description,
-          features: res.data.CarFeature,
-          pricePerDay: res.data.pricePerDay,
-        };
-
-        form.reset(data);
-        setCarImages(res.data.CarImage);
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  // Upload song song thẳng lên Cloudinary và chờ tất cả xong
+  const uploadImagesToCloud = (files: File[]) =>
+    Promise.all(files.map((file) => uploadImageToCloudinary(file, 'rental-cars-cloudinary/cars')));
 
   const handleUploadImage = (e: any) => {
     const files = e.target.files;
@@ -301,7 +219,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
         return;
       } else {
         imageArr.push(URL.createObjectURL(file));
-        setCarImages(imageArr);
+        setPreviewImages([...imageArr]);
         form.setValue('images', imageArr);
       }
     });
@@ -314,71 +232,90 @@ export function CreateCarForm({ slug }: { slug: string }) {
   async function onSubmit(values: z.infer<typeof createCarSchema>) {
     setIsLoading(true);
     try {
-      const imgArr = await uploadImagesToCloud(selectedImage);
-      const address = `${values.ward_name}, ${values.district_name}, ${values.province_name}`;
+      const isNew = slug === 'new';
 
-      if (slug === 'new') {
-        values.images = imgArr;
-
-        const res = await API.post(CREATE_CAR, {
-          ...values,
-          address,
-          pricePerDay: Number(values.pricePerDay),
-        });
-
-        if (res.status === 201) {
-          toast.success('Thêm xe thành công!');
-          setIsLoading(false);
-          router.push('/mycars');
-        } else {
-          toast.error('Thêm xe thất bại!');
-          setIsLoading(false);
-        }
-      } else {
-        const res = await API.put(UPDATE_USER, values);
-
-        if (res.status === 200) {
-          toast.success('Cập nhật xe thành công!');
-          setIsLoading(false);
-          router.push('/mycars');
-        } else {
-          toast.error('Cập nhật xe thất bại!');
-          setIsLoading(false);
-        }
+      if (isNew && selectedImage.length < 4) {
+        toast.error('Vui lòng chọn tối thiểu 4 ảnh');
+        return;
       }
 
-      setIsLoading(false);
+      // Khi sửa xe mà không chọn ảnh mới thì giữ nguyên ảnh cũ
+      const images = selectedImage.length > 0 ? await uploadImagesToCloud(selectedImage) : undefined;
+      const address =
+        values.ward_name && values.district_name && values.province_name
+          ? `${values.ward_name}, ${values.district_name}, ${values.province_name}`
+          : undefined;
+
+      const payload = {
+        licensePlates: values.licensePlates,
+        modelId: values.modelId,
+        seats: values.seats,
+        yearOfManufacture: values.yearOfManufacture,
+        transmission: values.transmission,
+        fuel: values.fuel,
+        description: values.description,
+        features: values.features,
+        pricePerDay: Number(values.pricePerDay),
+        address,
+        images,
+      };
+
+      if (isNew) {
+        await API.post(CREATE_CAR, payload);
+        toast.success('Thêm xe thành công! Xe sẽ hiển thị sau khi được duyệt.');
+      } else {
+        await API.patch(`${UPDATE_CAR}/${Number(slug)}`, payload);
+        toast.success('Cập nhật xe thành công! Xe sẽ được duyệt lại.');
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.myCars });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminCars });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminCarRegistrations });
+      router.push('/mycars');
     } catch (error: any) {
-      setIsLoading(false);
-      toast.error(error?.message);
+      const message = Array.isArray(error?.message) ? error.message.join(', ') : error?.message;
+      toast.error(message || 'Lưu xe thất bại');
     } finally {
       setIsLoading(false);
     }
   }
 
+  // Nạp dữ liệu vào form khi tải xong (form.reset của react-hook-form, không phải setState của React)
   useEffect(() => {
-    getAllBrand();
-    getFeatures();
-    getProvince();
-
-    if (slug === 'new') {
+    if (isNew) {
       form.reset({
         images: [],
         licensePlates: '',
         brandId: 0,
         modelId: 0,
         seats: 4,
-        yearOfManufacture: 2023,
+        yearOfManufacture: new Date().getFullYear(),
         transmission: 'AUTOMATIC_TRANSMISSION',
         fuel: 'GASOLINE',
         description: '',
         features: [],
         pricePerDay: 1000,
       });
-    } else {
-      getCarById(slug);
+    } else if (car) {
+      form.reset({
+        images: [],
+        licensePlates: car.licensePlates,
+        brandId: car.brandId,
+        modelId: car.modelId,
+        seats: car.seats,
+        yearOfManufacture: car.yearOfManufacture,
+        transmission: car.transmission,
+        fuel: car.fuel,
+        description: car.description,
+        features: car.CarFeature,
+        pricePerDay: car.pricePerDay,
+      });
     }
-  }, [slug]);
+  }, [isNew, car, form]);
+
+  useEffect(() => {
+    if (province?.name) form.setValue('province_name', province.name);
+  }, [province, form]);
 
   return (
     <Form {...form}>
@@ -534,6 +471,7 @@ export function CreateCarForm({ slug }: { slug: string }) {
                           )}
                           disabled={slug !== 'new'}
                         >
+                          {/* eslint-disable-next-line react-hooks/incompatible-library -- watch() của react-hook-form chưa hỗ trợ React Compiler */}
                           {form.watch('brandId')
                             ? field.value
                               ? brandData

@@ -17,7 +17,6 @@ import {
 
 const StatusCombobox = ({
   statuses,
-  initStatus,
 }: {
   statuses: any;
   initStatus: string;

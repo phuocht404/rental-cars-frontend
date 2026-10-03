@@ -14,10 +14,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UPDATE_ORDER_DETAIL_STATUS_BY_ID } from '@/lib/api-constants';
 import { cn } from '@/lib/utils';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
-import { setDependence } from '@/stores/reducers/depReducer';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface UpdateOrderDetailDialogProps {
@@ -40,7 +40,7 @@ const UpdateOrderDetailDialog = ({
   const [open, setOpen] = useState<boolean>(false);
   const [note, setNote] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const submit = async () => {
     setIsLoading(true);
@@ -88,7 +88,9 @@ const UpdateOrderDetailDialog = ({
       );
 
       if (res.status === 200) {
-        dispatch(setDependence({}));
+        queryClient.invalidateQueries({ queryKey: queryKeys.myOrderDetails });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminAnalytics });
+        queryClient.invalidateQueries({ queryKey: ["order-detail"] });
         toast.success('Cập nhật trạng thái đơn hàng thành công');
         setOpen(false);
       }

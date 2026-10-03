@@ -1,7 +1,8 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -18,6 +19,7 @@ import {
 import { CommandItem } from '@/components/ui/command';
 import { UPDATE_CAR_STATUS } from '@/lib/api-constants';
 import { cn } from '@/lib/utils';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
 
 interface UpdateStatusDialogProps {
@@ -36,12 +38,15 @@ interface UpdateStatusDialogProps {
 const UpdateStatusAlertDialog = (props: UpdateStatusDialogProps) => {
   const { statusItem, carId, statusInit, className } = props;
   const [value, setValue] = useState<typeof statusItem>(statusItem);
+  const queryClient = useQueryClient();
 
   const updateCarStatus = async (status: string) => {
     try {
       const res = await API.patch(UPDATE_CAR_STATUS + `/${carId}`, { status });
       if (res.status === 200) {
         toast.success('Cập nhật trạng thái xe thành công');
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminCars });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminCarRegistrations });
         setValue(res.data.status);
         window.location.reload();
       }
@@ -52,9 +57,6 @@ const UpdateStatusAlertDialog = (props: UpdateStatusDialogProps) => {
     }
   };
 
-  useEffect(() => {
-    setValue(statusItem);
-  }, []);
 
   return (
     <AlertDialog>

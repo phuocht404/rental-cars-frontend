@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { BellRing } from 'lucide-react';
+import React from 'react';
 
 import { columns } from '@/app/(client)/(routes)/(profiles)/myorders/columns';
 import {
@@ -11,82 +11,51 @@ import {
 import { DataTable } from '@/components/admin/tables/data-table';
 import TableSkeleton from '@/components/skeletons/table-skeleton';
 import { GET_ORDER_DETAIL_BY_USER_ID } from '@/lib/api-constants';
-import { API } from '@/services';
-import { useAppSelector } from '@/stores/hooks';
-import { selectDep } from '@/stores/reducers/depReducer';
+import { queryKeys, useApiQuery } from '@/lib/query';
+
+const filterOrderDetail = [{ orderDetailStatus }, { paymentStatus }];
+const initVisibleColumns = [
+  'id',
+  'orderId',
+  'carId',
+  'startDate',
+  'endDate',
+  'totalAmount',
+  'orderDetailStatus',
+  'paymentStatus',
+  'actions',
+];
 
 const MyordersPage = () => {
-  const [orders, setOrders] = useState();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dep = useAppSelector(selectDep);
-
-  const filterOrderDetail = [{ orderDetailStatus }, { paymentStatus }];
-
-  const initVisibleColumns = [
-    'id',
-    'orderId',
-    'carId',
-    'startDate',
-    'endDate',
-    'totalAmount',
-    'orderDetailStatus',
-    'paymentStatus',
-    'actions',
-  ];
-
-  const getOrderDetail = async () => {
-    setIsLoading(true);
-    try {
-      const res = await API.get(GET_ORDER_DETAIL_BY_USER_ID);
-
-      if (res.status === 200) {
-        setOrders(res.data);
-
-        let countStatus = 0;
-        res.data.map((order: any) => {
-          if (order.orderDetailStatus === 'PENDING') {
-            countStatus++;
-          }
-        });
-
-        if (countStatus > 0) {
-          toast.warning(`Có ${countStatus} đơn hàng đang chờ duyệt`);
-        }
-      }
-
-      setIsLoading(false);
-    } catch (error: any) {
-      toast.error(error.message);
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getOrderDetail();
-  }, [dep]);
+  const { data: orders, isPending } = useApiQuery<any[]>(queryKeys.myOrderDetails, GET_ORDER_DETAIL_BY_USER_ID);
+  const pendingCount = orders?.filter((order) => order.orderDetailStatus === 'PENDING').length ?? 0;
 
   return (
     <div className="w-full rounded-2xl border border-border bg-card p-6 md:p-4">
-      <div className="mb-10">
-        <header className="flex items-center justify-between">
-          <h3 className="text-2xl font-bold">Đơn đặt xe</h3>
-        </header>
-      </div>
+      <header className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Đơn đặt xe</h1>
+      </header>
 
-      <div>
-        {orders ? (
-          <DataTable
-            columns={columns}
-            data={orders}
-            filters={filterOrderDetail}
-            initVisibleColumns={initVisibleColumns}
-          />
-        ) : (
-          <TableSkeleton />
-        )}
-      </div>
+      {pendingCount > 0 && (
+        <p
+          role="status"
+          className="mb-6 flex items-center gap-2 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm"
+        >
+          <BellRing className="h-4 w-4" aria-hidden />
+          Có {pendingCount} chuyến đang chờ bạn xác nhận. Chuyến chưa xác nhận sẽ tự huỷ khi tới ngày nhận xe.
+        </p>
+      )}
+
+      {isPending ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={orders ?? []}
+          filters={filterOrderDetail}
+          initVisibleColumns={initVisibleColumns}
+        />
+      )}
     </div>
   );
 };

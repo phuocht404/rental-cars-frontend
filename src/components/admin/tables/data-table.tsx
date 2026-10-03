@@ -3,6 +3,8 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  OnChangeFn,
+  PaginationState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -27,6 +29,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+
+export interface ServerTableOptions {
+  pageCount: number;
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  columnFilters: ColumnFiltersState;
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>;
+  /** Đang tải trang mới (giữ dữ liệu cũ trên màn hình, chỉ làm mờ) */
+  isFetching?: boolean;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +48,8 @@ interface DataTableProps<TData, TValue> {
   filters?: any[];
   initVisibleColumns?: string[];
   statuses?: any[];
+  /** Có giá trị thì phân trang + lọc + tìm kiếm do server xử lý */
+  server?: ServerTableOptions;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,12 +58,15 @@ export function DataTable<TData, TValue>({
   search,
   filters,
   initVisibleColumns = [],
+  server,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [localColumnFilters, setLocalColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const columnFilters = server?.columnFilters ?? localColumnFilters;
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table chưa hỗ trợ React Compiler
   const table = useReactTable({
     data,
     columns,
@@ -65,11 +83,18 @@ export function DataTable<TData, TValue>({
       },
       rowSelection,
       columnFilters,
+      ...(server && { pagination: server.pagination }),
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: server?.onColumnFiltersChange ?? setLocalColumnFilters,
+    ...(server && {
+      manualPagination: true,
+      manualFiltering: true,
+      pageCount: Math.max(server.pageCount, 1),
+      onPaginationChange: server.onPaginationChange,
+    }),
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -88,7 +113,7 @@ export function DataTable<TData, TValue>({
         table.getColumn(columnId)?.toggleVisibility(true);
       });
     }
-  }, [initVisibleColumns]);
+  }, [initVisibleColumns, table]);
 
   return (
     <div className="space-y-4">
@@ -99,7 +124,13 @@ export function DataTable<TData, TValue>({
         initVisibleColumns={initVisibleColumns}
       />
 
-      <div className="overflow-hidden rounded-xl border border-border">
+      <div
+        className={cn(
+          'overflow-hidden rounded-xl border border-border transition-opacity',
+          server?.isFetching && 'opacity-60',
+        )}
+        aria-busy={server?.isFetching || undefined}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

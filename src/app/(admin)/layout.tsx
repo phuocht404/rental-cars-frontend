@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import React from 'react';
 
 import Header from '@/components/admin/header';
 import { Sidebar } from '@/components/admin/sidebar';
+
+export const metadata: Metadata = {
+  title: { default: 'Quản trị', template: '%s | Quản trị Rental Cars' },
+  robots: { index: false, follow: false },
+};
 
 export default function DashboardLayout({
   children,

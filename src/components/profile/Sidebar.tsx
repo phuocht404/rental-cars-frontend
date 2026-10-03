@@ -2,7 +2,6 @@
 
 import {
   CarFront,
-  Heart,
   ListOrdered,
   LockKeyhole,
   LogOut,
@@ -10,16 +9,13 @@ import {
   User,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import React, { ReactElement, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { usePathname } from 'next/navigation';
+import React, { ReactElement, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { CookiesStorage } from '@/config/cookie';
+import { signOut, useCurrentUser } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
-import { logout } from '@/stores/reducers/authReducer';
-import { setDependence } from '@/stores/reducers/depReducer';
 
 const ProfileMenu: { icon: ReactElement; href: string; label: string }[] = [
   {
@@ -40,20 +36,14 @@ const ProfileMenu: { icon: ReactElement; href: string; label: string }[] = [
 ];
 
 const Sidebar = ({ className }: { className?: string }) => {
-  const [isLogged, setIsLogged] = useState<boolean>(false);
-  const dispatch = useDispatch();
-  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const pathname = usePathname();
-  const [username, setUsername] = useState<string>('');
-  const [menu, setMenu] = useState<any[]>(ProfileMenu);
+  const { user } = useCurrentUser();
+  const username = user?.name || user?.username || '';
 
-  useEffect(() => {
-    const userInfo: any = JSON.parse(localStorage.getItem('user') || '{}');
-    if (userInfo) {
-      setUsername(userInfo?.username);
-
-      if (userInfo.role && userInfo?.role === 'CAROWNER') {
-        setMenu([
+  const menu =
+    user?.role === 'CAROWNER'
+      ? [
           ...ProfileMenu,
           {
             icon: <CarFront size={24} />,
@@ -65,26 +55,15 @@ const Sidebar = ({ className }: { className?: string }) => {
             href: '/myorders',
             label: 'Đơn đặt xe',
           },
-        ]);
-      }
-    }
-  }, []);
+        ]
+      : ProfileMenu;
 
-  const handleLogout = () => {
-    // clear local storage
-    localStorage.removeItem('user');
-
-    // clear redux store
-    dispatch(logout());
-    dispatch(setDependence({}));
-
-    // clear cookie storage
-    CookiesStorage.clearAllCookies();
-
-    setIsLogged(false);
-
-    router.push('/');
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await signOut();
     toast.info('Đã đăng xuất!!!');
+    // Tải lại hoàn toàn để xoá mọi dữ liệu đã render cho phiên cũ
+    window.location.assign(new URL('/', window.location.origin).href);
   };
 
   return (
@@ -126,7 +105,7 @@ const Sidebar = ({ className }: { className?: string }) => {
         variant="outline"
         className="w-full justify-start gap-3 px-3 text-sm font-normal"
         onClick={handleLogout}
-        isLoading={isLogged}
+        isLoading={isLoggingOut}
       >
         <LogOut size={20} className="rotate-180" />
         Đăng xuất

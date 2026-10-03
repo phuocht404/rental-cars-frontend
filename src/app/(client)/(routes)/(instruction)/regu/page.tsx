@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
 import React from 'react';
+
+export const metadata: Metadata = {
+  title: 'Quy chế hoạt động',
+  description: 'Quy chế hoạt động của sàn giao dịch thuê xe tự lái Rental Cars.',
+  alternates: { canonical: '/regu' },
+};
 
 const ReguPage = () => {
   return (

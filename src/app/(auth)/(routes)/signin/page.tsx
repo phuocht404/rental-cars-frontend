@@ -1,8 +1,14 @@
 import Link from 'next/link';
-import React from 'react';
+import type { Metadata } from 'next';
+import React, { Suspense } from 'react';
 
 import AuthShell from '@/components/AuthShell';
 import { SignInFrom } from '@/components/forms/SignInForm';
+
+export const metadata: Metadata = {
+  title: 'Đăng nhập',
+  robots: { index: false, follow: true },
+};
 
 const SignInPage = () => {
   return (
@@ -21,7 +27,9 @@ const SignInPage = () => {
         </>
       }
     >
-      <SignInFrom />
+      <Suspense>
+        <SignInFrom />
+      </Suspense>
     </AuthShell>
   );
 };

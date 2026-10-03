@@ -1,7 +1,7 @@
 'use client';
 
 import { Delete } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -16,11 +16,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DELETE_USER } from '@/lib/api-constants';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
-import { setDependence } from '@/stores/reducers/depReducer';
 
 export function DeleteDialog({ data }: { data: any }) {
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     const res = await API.destroy(DELETE_USER + `/${data.id}`);
@@ -28,7 +28,7 @@ export function DeleteDialog({ data }: { data: any }) {
     if (res.status === 200) {
       toast.success('Xóa người dùng thành công');
       //   load data
-      dispatch(setDependence({}));
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers });
     } else {
       toast.error('Xóa người dùng thất bại');
     }

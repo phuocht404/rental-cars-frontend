@@ -1,50 +1,22 @@
-'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { cn } from '@/lib/utils';
 
 interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Độ trễ (ms), dùng để tạo hiệu ứng xuất hiện lần lượt */
+  /** Độ trễ (ms) để các phần tử xuất hiện lần lượt */
   delay?: number;
 }
 
-/** Hiện phần tử với hiệu ứng fade-up khi cuộn tới (chạy một lần). */
-const Reveal = ({ delay = 0, className, style, ...props }: RevealProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-
-    if (!el || typeof IntersectionObserver === 'undefined') {
-      setVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={cn('reveal', visible && 'is-visible', className)}
-      style={{ ...style, ['--reveal-delay' as any]: `${delay}ms` }}
-      {...props}
-    />
-  );
-};
+/**
+ * Fade-up khi cuộn tới, thuần CSS (scroll-driven animation) nên không cần JavaScript:
+ * nội dung render từ server hiện ngay, trình duyệt không hỗ trợ thì chỉ đơn giản là không có hiệu ứng.
+ */
+const Reveal = ({ delay = 0, className, style, ...props }: RevealProps) => (
+  <div
+    className={cn('reveal', className)}
+    style={{ ...style, ['--reveal-delay' as string]: `${delay}ms` }}
+    {...props}
+  />
+);
 
 export default Reveal;

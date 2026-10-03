@@ -1,15 +1,10 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/dist/query';
-import { combineReducers } from 'redux';
-
-import cartReducer, { saveCartState } from '@/stores/reducers/cartReducer';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import authReducer from './reducers/authReducer';
-import depReducer from './reducers/depReducer';
+import cartReducer, { saveCartItems } from './reducers/cartReducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  dep: depReducer,
   cart: cartReducer,
 });
 
@@ -17,12 +12,16 @@ export const store = configureStore({
   reducer: rootReducer,
 });
 
-// Subscribe to store changes to save the state to localStorage
+// Lưu giỏ hàng xuống localStorage mỗi khi thay đổi (chỉ sau khi đã nạp từ localStorage lên)
+let lastSavedItems = store.getState().cart.items;
 store.subscribe(() => {
-  saveCartState(store.getState().cart);
+  const { items, hydrated } = store.getState().cart;
+
+  if (hydrated && items !== lastSavedItems) {
+    lastSavedItems = items;
+    saveCartItems(items);
+  }
 });
 
-setupListeners(store.dispatch);
-
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;

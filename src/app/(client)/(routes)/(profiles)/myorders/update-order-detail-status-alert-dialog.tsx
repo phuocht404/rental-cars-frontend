@@ -1,7 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import {
   AlertDialog,
@@ -32,11 +32,8 @@ interface UpdateStatusDialogProps {
 
 const UpdateOrderDetailStatusAlertDialog = (props: UpdateStatusDialogProps) => {
   const { statusItem, statusInit, className, handleUpdateStatus } = props;
-  const [value, setValue] = useState<typeof statusItem>(statusItem);
+  const value = statusItem;
 
-  useEffect(() => {
-    setValue(statusItem);
-  }, [statusInit]);
 
   return (
     <AlertDialog>

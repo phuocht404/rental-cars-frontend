@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 
 import Sidebar from '@/components/profile/Sidebar';
+
+// Trang cá nhân không cần (và không nên) xuất hiện trên công cụ tìm kiếm
+export const metadata: Metadata = {
+  title: 'Tài khoản',
+  robots: { index: false, follow: false },
+};
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
   return (

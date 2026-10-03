@@ -1,10 +1,15 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+export const metadata: Metadata = {
+  title: 'Hướng dẫn chung',
+  description: 'Các bước thuê xe tự lái trên Rental Cars: tìm xe, đặt cọc, nhận xe và trả xe.',
+  alternates: { canonical: '/howitwork' },
+};
 
 const travelerList: { icon: string; title: string; description: string }[] = [
   {

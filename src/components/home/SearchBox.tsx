@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DateRange } from 'react-day-picker';
 
+import { useClientToday } from '@/lib/use-client-today';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { cn } from '@/lib/utils';
 
@@ -17,10 +18,11 @@ const SearchBox = () => {
   const isNarrow = useMediaQuery('(max-width: 640px)');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: addDays(new Date(Date.now()), 1),
-    to: addDays(new Date(Date.now()), 1),
-  });
+  // Trang chủ là HTML tĩnh (ISR) nên "ngày mai" chỉ được tính ở trình duyệt
+  const today = useClientToday();
+  const [picked, setDate] = useState<DateRange | undefined>();
+  const date: DateRange | undefined =
+    picked ?? (today ? { from: addDays(today, 1), to: addDays(today, 2) } : undefined);
 
   const submit = () => {
     if (!date?.from || !date?.to) return;
@@ -82,7 +84,7 @@ const SearchBox = () => {
             selected={date}
             onSelect={setDate}
             numberOfMonths={isNarrow ? 1 : 2}
-            fromDate={addDays(new Date(Date.now()), 1)}
+            fromDate={today ? addDays(today, 1) : undefined}
           />
         </PopoverContent>
       </Popover>

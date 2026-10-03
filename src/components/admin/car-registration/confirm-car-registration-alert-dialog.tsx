@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import {
   AlertDialog,
@@ -15,11 +15,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { queryKeys } from '@/lib/query';
 import { API } from '@/services';
 import {
   UPDATE_CAR_STATUS,
-  UPDATE_REQUEST_OWNER_REGISTRATION,
 } from '@/lib/api-constants';
 
 interface ConfirmCarRegistrationAlertDialogProps {
@@ -35,8 +36,7 @@ const ConfirmCarRegistrationAlertDialog = ({
   status,
   className,
 }: ConfirmCarRegistrationAlertDialogProps) => {
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const updateCarStatus = async () => {
     try {
@@ -48,12 +48,12 @@ const ConfirmCarRegistrationAlertDialog = ({
 
       if (res.status === 200) {
         toast.success('Cập nhật thành công');
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminCarRegistrations });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adminCars });
       }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setLoading(false);
-      setOpen(false);
     }
   };
 

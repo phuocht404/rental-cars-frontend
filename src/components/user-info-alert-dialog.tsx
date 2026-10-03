@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GET_USER_BY_ID } from '@/lib/api-constants';
+import { useCurrentUser } from '@/lib/auth-client';
 import { formatDateToDMY } from '@/lib/utils';
 import { API } from '@/services';
 
@@ -23,15 +24,20 @@ export function UserInfoAlertDialog({
   avatarUrl,
 }: {
   userId: number;
-  avatarUrl: string;
+  avatarUrl?: string | null;
 }) {
   const [user, setUser] = useState<any>({});
+  const [loaded, setLoaded] = useState<boolean>(false);
+  const { isLoggedIn } = useCurrentUser();
 
+  // Chỉ tải khi người dùng mở hộp thoại (và đã đăng nhập), không gọi API ngay khi trang render
   async function getUser() {
     try {
-      if (!userId) {
+      if (!userId || !isLoggedIn || loaded) {
         return;
       }
+
+      setLoaded(true);
 
       const { data } = await API.get(GET_USER_BY_ID + `/${userId}`);
       if (data) {
@@ -42,15 +48,15 @@ export function UserInfoAlertDialog({
     }
   }
 
-  useEffect(() => {
-    getUser();
-  }, []);
-
   return (
-    <AlertDialog>
+    <AlertDialog onOpenChange={(open) => open && getUser()}>
       <AlertDialogTrigger asChild>
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={avatarUrl} alt="avatar" />
+        <Avatar
+          className="h-20 w-20 cursor-pointer"
+          role="button"
+          aria-label="Xem thông tin chủ xe"
+        >
+          <AvatarImage src={avatarUrl ?? undefined} alt="avatar" />
           <AvatarFallback>Avatar</AvatarFallback>
         </Avatar>
       </AlertDialogTrigger>
@@ -63,7 +69,7 @@ export function UserInfoAlertDialog({
             <div className="flex h-full w-full items-center justify-between gap-3">
               <div className="flex w-1/3 flex-col items-center justify-between gap-3">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={avatarUrl} alt="avatar" />
+                  <AvatarImage src={avatarUrl ?? undefined} alt="avatar" />
                   <AvatarFallback>Avatar</AvatarFallback>
                 </Avatar>
 
@@ -87,14 +93,23 @@ export function UserInfoAlertDialog({
                     <span className="font-bold">{user?.successRate}%</span>
                   </div>
                 </div>
+                {!isLoggedIn && (
+                  <span className="text-sm text-muted-foreground">
+                    Đăng nhập để xem thêm thông tin chủ xe.
+                  </span>
+                )}
+                {user?.email && (
                 <div className="flex w-full items-center justify-between gap-3">
                   <span className="font-bold">Email:</span>
                   <span className="">{user?.email}</span>
                 </div>
+                )}
+                {user?.phone && (
                 <div className="flex w-full items-center justify-between gap-3">
                   <span className="font-bold">Số điện thoại:</span>
                   <span className="">{user?.phone}</span>
                 </div>
+                )}
               </div>
             </div>
           </AlertDialogDescription>

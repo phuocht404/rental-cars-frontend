@@ -21,7 +21,6 @@ interface UsersTableViewOptionsProps<TData> {
 
 export function DataTableViewOptions<TData>({
   table,
-  initVisibleColumns = [],
 }: UsersTableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>

@@ -1,7 +1,10 @@
+'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
+import { useCurrentUser } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 
 const menuItems: { title: string; href: string }[] = [
@@ -16,34 +19,14 @@ const menuItems: { title: string; href: string }[] = [
 ];
 
 const Navbar = () => {
-  const [menu, setMenu] = useState<any[]>(menuItems);
   const pathName = usePathname();
+  const { user } = useCurrentUser();
 
-  const generateMenu = () => {
-    const userInfo: any = JSON.parse(localStorage.getItem('user') || '{}');
-
-    if (userInfo.role && userInfo?.role === 'TRAVELER') {
-      setMenu([
-        ...menuItems,
-        {
-          title: 'Đăng ký chủ xe',
-          href: '#explorer',
-        },
-      ]);
-    } else if (userInfo.role && userInfo?.role === 'CAROWNER') {
-      setMenu([
-        ...menuItems,
-        {
-          title: 'Quản lý xe',
-          href: '/mycars',
-        },
-      ]);
-    }
-  };
-
-  useEffect(() => {
-    generateMenu();
-  }, []);
+  const menu = [
+    ...menuItems,
+    ...(user?.role === 'TRAVELER' ? [{ title: 'Đăng ký chủ xe', href: '/#explorer' }] : []),
+    ...(user?.role === 'CAROWNER' ? [{ title: 'Quản lý xe', href: '/mycars' }] : []),
+  ];
 
   return (
     <ul className="flex items-center justify-center gap-1 md:hidden">

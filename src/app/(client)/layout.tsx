@@ -1,19 +1,7 @@
-import type { Metadata } from 'next';
 import React from 'react';
 
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-  ),
-  title: {
-    default: 'Rental Cars',
-    template: '%s | Rental Cars',
-  },
-  description: 'Self-driving car rental application.',
-};
 
 export default function HomeLayout({
   children,
