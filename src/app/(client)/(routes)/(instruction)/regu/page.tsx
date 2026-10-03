@@ -8,7 +8,7 @@ const ReguPage = () => {
       <div className="">
         <div className="">
           <h3 className="mb-4 text-xl font-semibold">I. Nguyên tắc chung</h3>
-          <p className="text-justify text-base text-gray-600">
+          <p className="text-base leading-relaxed text-muted-foreground">
             Sàn giao dịch TMĐT Rental Cars (sau đây gọi tắt là “Sàn giao dịch") do Rental Cars ("Công ty") xây dựng và vận hành. Thành
             viên trên Sàn giao dịch là các thương nhân, tổ chức, cá nhân có hoạt
             động thương mại hợp pháp được Ban Quản lí Sàn giao dịch TMĐT
@@ -35,7 +35,7 @@ const ReguPage = () => {
           <h3 className="mb-4 text-xl font-semibold">II. Quy định chung</h3>
           <div className="">
             <h4 className="mb-3 text-lg font-semibold">1. Định nghĩa chung</h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Tên miền Sàn Giao dịch TMĐT Rental Cars: do Rental Cars phát triển với tên miền của Sàn giao dịch là Rental Cars. Người
               bán (Chủ xe/Đối tác): là thương nhân, tổ chức, cá nhân có nhu cầu
               sử dụng dịch vụ của Sàn giao dịch để: giới thiệu xe cho thuê, dịch
@@ -67,7 +67,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               2. Hướng dẫn sử dụng chung
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Công ty sẽ cấp một tài khoản (Account) để Thành viên có thể sử
               dụng dịch trên Sàn giao dịch trong khuôn khổ Điều khoản sử dụng đã
               đề ra. Thành viên sẽ phải đăng ký tài khoản với thông tin xác thực
@@ -121,7 +121,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               3. Điều khoản sử dụng
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Khi tham gia hoạt động trên Sàn giao dịch TMĐT Rental Cars có nghĩa
               là Thành viên đồng ý với các điều khoản dưới đây. Các điều kiện,
               điều khoản và nội dung tại Sàn giao dịch và hợp đồng phát sinh bị
@@ -135,7 +135,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               4. Thương hiệu và bản quyền
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Mọi quyền sở hữu trí tuệ (đã đăng ký hoặc chưa đăng ký), nội dung
               thông tin và tất cả các thiết kế, văn bản, đồ họa, phần mềm, hình
               ảnh, video, âm nhạc, âm thanh, biên dịch phần mềm, mã nguồn và
@@ -155,7 +155,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               5. Chấp nhận đơn hàng và giá cả
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Giá cả dịch vụ tại Sàn giao dịch là giá đã bao gồm thuế Giá trị
               gia tăng (VAT). Giá cả của dịch vụ có thể thay đổi tùy thời điểm
               và chương trình khuyến mãi kèm theo. Công ty có quyền từ chối hoặc
@@ -186,7 +186,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               1. Quy trình dành cho người mua (khách hàng)
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Để thuê xe trên Sàn giao dịch, Khách hàng vào website Rental Cars và
               thực hiện các bước sau: Bước 1: Khách hàng truy cập vào website
               Rental Cars và đăng nhập vào tài khoản của mình, nếu Khách hàng chưa
@@ -241,7 +241,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               2. Quy trình dành cho người bán (chủ xe)
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Các thông tin đăng ký được yêu cầu phải đầy đủ, đúng chính tả,
               thống nhất với nhau, không vi phạm về đăng tin nói chung. Thông
               tin đăng ký phải trung thực, rõ ràng, không gây nhầm lẫn hoặc hiểu
@@ -264,7 +264,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               3. Quy trình nhận dịch vụ
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Khi đến thời điểm thuê xe, Khách hàng sẽ đến địa điểm của Chủ xe
               để nhận xe hoặc Chủ xe sẽ đưa xe đến trực tiếp địa chỉ của Khách
               hàng tùy theo phương phức giao nhận Khách hàng đã lựa chọn khi đặt
@@ -288,7 +288,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               4. Quy trình thay đổi dịch vụ
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Hệ thống Công ty không hỗ trợ tính năng thay đổi lịch trình, vì
               thế trong trường hợp khách hàng sau khi đã đặt cọc và muốn thay
               đổi thời gian chuyến đi hay loại xe thì cần tiến hành hủy chuyến
@@ -300,7 +300,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               5. Quy trình hủy dịch vụ
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Khi muốn hủy chuyến đi đã đặt cọc, Khách hàng thực hiện theo các
               bước sau đây: Bước 1: Thông báo tới Sàn giao dịch về việc thay đổi
               chuyến đi bằng các cách: 1.a Truy cập vào website Rental Cars, đăng
@@ -321,7 +321,7 @@ const ReguPage = () => {
             <h4 className="mb-3 text-lg font-semibold">
               6. Quy trình giải quyết khiếu nại
             </h4>
-            <p className="text-justify text-base text-gray-600">
+            <p className="text-base leading-relaxed text-muted-foreground">
               Công ty và Chủ xe có trách nhiệm tiếp nhận các khiếu nại và hỗ trợ
               Khách hàng liên quan đến các giao dịch được kết nối thông qua Sàn
               giao dịch. Các khiếu nại liên quan đến việc cung cấp, sử dụng dịch

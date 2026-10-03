@@ -108,9 +108,9 @@ const HowItWorkPage = () => {
                     <div className="absolute right-0 top-0 rounded-xl bg-primary p-4 font-semibold text-white">
                       {index + 1}.
                     </div>
-                    <Image src={icon} alt={icon} width={60} height={60} />
+                    <Image src={icon} alt="" width={60} height={60} />
                     <h5 className="my-3 text-xl font-semibold">{title}</h5>
-                    <p className="text-justify text-base text-gray-500">
+                    <p className="text-base leading-relaxed text-muted-foreground">
                       {description}
                     </p>
                   </div>
@@ -135,9 +135,9 @@ const HowItWorkPage = () => {
                     <div className="absolute right-0 top-0 rounded-xl bg-primary p-4 font-semibold text-white">
                       {index + 1}.
                     </div>
-                    <Image src={icon} alt={icon} width={60} height={60} />
+                    <Image src={icon} alt="" width={60} height={60} />
                     <h5 className="my-3 text-xl font-semibold">{title}</h5>
-                    <p className="text-justify text-base text-gray-500">
+                    <p className="text-base leading-relaxed text-muted-foreground">
                       {description}
                     </p>
                   </div>
