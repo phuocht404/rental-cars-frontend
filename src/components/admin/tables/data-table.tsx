@@ -14,6 +14,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
+import { Inbox } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { DataTablePagination } from '@/components/admin/tables/data-table-pagination';
@@ -98,7 +99,7 @@ export function DataTable<TData, TValue>({
         initVisibleColumns={initVisibleColumns}
       />
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-xl border border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -137,11 +138,11 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Không có dữ liệu.
+                <TableCell colSpan={columns.length} className="h-40 text-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Inbox className="h-8 w-8" />
+                    <span className="text-sm">Không có dữ liệu.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
