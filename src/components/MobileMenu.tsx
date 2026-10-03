@@ -92,7 +92,7 @@ const MobileMenu = () => {
       </Button>
 
       {isOpen && (
-        <div className="fixed left-0 top-0 h-full w-full bg-[#f6f7f9]">
+        <div className="fixed left-0 top-0 h-full w-full bg-background">
           <Button
             variant="outline"
             className="absolute right-4 top-4 rounded-full"
@@ -102,20 +102,20 @@ const MobileMenu = () => {
             <X size={20} />
           </Button>
 
-          <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/4 transform rounded-lg bg-white p-4">
+          <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/4 transform rounded-lg bg-card p-4">
             {isLogged && (
               <Link href="/">
-                <Username className="text-base font-medium text-black" />
+                <Username className="text-base font-medium text-foreground" />
               </Link>
             )}
 
-            <hr className="my-4 w-full border border-solid border-gray-300/50" />
+            <hr className="my-4 w-full border border-solid border-border/50" />
 
             <ul className="flex flex-col items-center justify-center">
               {mobileMenuItems.map(({ title, href }, index) => (
                 <li
                   key={index}
-                  className="w-full cursor-pointer rounded-lg hover:bg-gray-100 hover:underline"
+                  className="w-full cursor-pointer rounded-lg hover:bg-accent hover:underline"
                 >
                   <Link
                     href={href}
@@ -127,7 +127,7 @@ const MobileMenu = () => {
               ))}
             </ul>
 
-            <hr className="my-4 w-full border border-solid border-gray-300/50" />
+            <hr className="my-4 w-full border border-solid border-border/50" />
 
             {/* check login */}
             {isLogged ? (
@@ -143,14 +143,14 @@ const MobileMenu = () => {
               <div className="flex items-center justify-center gap-4">
                 <Link
                   href="/signup"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 p-2 text-base font-medium hover:underline"
+                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-border p-2 text-base font-medium hover:underline"
                 >
                   Đăng ký
                 </Link>
 
                 <Link
                   href="/signin"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 bg-primary p-2 text-base font-medium text-white hover:underline"
+                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-border bg-primary p-2 text-base font-medium text-white hover:underline"
                 >
                   Đăng nhập
                 </Link>

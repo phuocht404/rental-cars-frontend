@@ -110,19 +110,23 @@ export function SignInFrom() {
                     className="pr-9"
                   />
                   {showPassword ? (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <Eye size={18} />
-                    </a>
+                    </button>
                   ) : (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <EyeOff size={18} />
-                    </a>
+                    </button>
                   )}
                 </div>
               </FormControl>
@@ -134,8 +138,13 @@ export function SignInFrom() {
           )}
         />
 
-        <div className="w-full text-right text-xs hover:underline">
-          <Link href="#">Quên mật khẩu?</Link>
+        <div className="w-full pb-2 pt-1 text-right text-sm">
+          <Link
+            href="#"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Quên mật khẩu?
+          </Link>
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>

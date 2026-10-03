@@ -116,19 +116,23 @@ export function SignUpFrom() {
                     className="pr-9"
                   />
                   {showPassword ? (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <Eye size={18} />
-                    </a>
+                    </button>
                   ) : (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <EyeOff size={18} />
-                    </a>
+                    </button>
                   )}
                 </div>
               </FormControl>
@@ -155,23 +159,27 @@ export function SignUpFrom() {
                     className="pr-9"
                   />
                   {showConfirmPassword ? (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <Eye size={18} />
-                    </a>
+                    </button>
                   ) : (
-                    <a
+                    <button
+                      type="button"
+                      aria-label="Hiện hoặc ẩn mật khẩu"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-2 cursor-pointer"
+                      className="absolute right-2 text-muted-foreground hover:text-foreground"
                     >
                       <EyeOff size={18} />
-                    </a>
+                    </button>
                   )}
                 </div>
               </FormControl>

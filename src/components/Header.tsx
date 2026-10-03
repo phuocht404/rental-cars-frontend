@@ -31,15 +31,15 @@ const Header = () => {
   }, [dep]);
 
   return (
-    <header className="sticky top-0 z-30 max-h-[80.438px] min-h-max w-full bg-primary shadow-lg">
-      <div className="flex items-center justify-center py-4">
-        <div className="flex w-full items-center justify-between px-32 lg:px-8">
+    <header className="sticky top-0 z-30 w-full border-b border-white/10 bg-primary shadow-sm dark:border-border dark:bg-card">
+      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center px-16 xl:px-8 md:px-4">
+        <div className="flex w-full items-center justify-between">
           <Logo />
 
           <div className="flex items-center justify-between gap-3">
             <Navbar />
 
-            <hr className="mx-2 h-6 border border-solid border-gray-300/50 md:hidden" />
+            <hr className="mx-2 h-6 border-0 border-l border-white/30 md:hidden" />
 
             {/* login */}
             {isLogged ? (
@@ -54,14 +54,14 @@ const Header = () => {
               <div className="flex items-center justify-center gap-4 lg:hidden">
                 <Link
                   href="/signup"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 p-2 text-base font-medium text-white hover:underline"
+                  className="flex h-10 min-w-[110px] items-center justify-center rounded-lg border border-white/60 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
                 >
                   Đăng ký
                 </Link>
 
                 <Link
                   href="/signin"
-                  className="flex min-w-[110px] items-center justify-center rounded-md border border-solid border-gray-200 bg-white p-2 text-base font-medium text-black hover:underline"
+                  className="flex h-10 min-w-[110px] items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-primary transition-all hover:bg-white/90 active:scale-[0.98]"
                 >
                   Đăng nhập
                 </Link>

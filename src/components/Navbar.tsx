@@ -46,16 +46,20 @@ const Navbar = () => {
   }, []);
 
   return (
-    <ul className="flex items-center justify-center gap-6 md:hidden">
+    <ul className="flex items-center justify-center gap-1 md:hidden">
       {menu.map(({ title, href }, index) => (
         <li
           key={index}
-          className={cn(
-            `text-base font-medium text-white hover:underline`,
-            pathName === href ? 'underline' : '',
-          )}
         >
-          <Link href={href}>{title}</Link>
+          <Link
+            href={href}
+            className={cn(
+              'block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white',
+              pathName === href && 'bg-white/15 text-white',
+            )}
+          >
+            {title}
+          </Link>
         </li>
       ))}
     </ul>

@@ -21,12 +21,10 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full w-full overflow-y-auto overflow-x-hidden">
+    <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-background text-foreground">
       <Header />
-      <main className="flex w-screen justify-center">
-        <div className="w-full px-32 py-10 dark:bg-black dark:text-white lg:px-8">
-          {children}
-        </div>
+      <main className="mx-auto w-full max-w-[1400px] px-16 py-8 xl:px-8 md:px-4">
+        {children}
       </main>
       <Footer />
     </div>
