@@ -15,12 +15,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen overflow-y-auto overflow-x-hidden bg-white dark:bg-black dark:text-white">
+    <div className="min-h-dvh w-full bg-background text-foreground">
       <div className="flex items-start justify-between">
-        <Sidebar className="h-screen w-1/6 border-r-2 border-slate-50" />
+        <Sidebar className="sticky top-0 h-dvh w-1/6 shrink-0 border-r border-border" />
         <div className="w-full overflow-x-auto">
           <Header />
-          <main className="w-full bg-white p-4 dark:bg-black">{children}</main>
+          <main className="w-full p-4">{children}</main>
         </div>
       </div>
     </div>

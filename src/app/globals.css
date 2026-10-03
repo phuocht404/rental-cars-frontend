@@ -76,15 +76,23 @@
   }
 }
 
+/* Trang cuộn bằng chính cửa sổ trình duyệt (không cuộn trong div) để trình duyệt nhớ vị trí cuộn
+   khi Back, thanh địa chỉ mobile tự thu gọn và anchor (#search) hoạt động chính xác */
+html {
+  scroll-behavior: smooth;
+  /* chừa chỗ cho header sticky khi nhảy tới anchor */
+  scroll-padding-top: 5rem;
+}
+
 html,
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  scroll-behavior: smooth;
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
 a {

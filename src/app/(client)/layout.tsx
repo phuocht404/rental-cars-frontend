@@ -9,9 +9,9 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-background text-foreground">
+    <div className="flex min-h-dvh w-full flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-[1400px] px-16 py-8 xl:px-8 md:px-4">
+      <main className="mx-auto w-full max-w-[1400px] flex-1 px-16 py-8 xl:px-8 md:px-4">
         {children}
       </main>
       <Footer />
